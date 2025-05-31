@@ -6,6 +6,8 @@ import Konva from "konva";
 import { useCanvasEditorStore, usePresenceStore } from "../../_utils/zustand/konva/impl";
 import { VideoDraftState } from "../../_utils/zustand/konva/store";
 import throttle from "lodash/throttle";
+import { LucideDownload, LucideTarget } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -152,12 +154,11 @@ const Canvas = (props: Props) => {
     );
 
     stage.scale({ x: fitScale, y: fitScale });
+
     stage.position({
       x: container.clientWidth / 2,
       y: container.clientHeight / 2,
     });
-    
-
 
     throttledUpdateStagePosition(container.clientWidth / 2, container.clientHeight / 2);
     throttledUpdateStageScale(fitScale, fitScale);
@@ -325,48 +326,25 @@ const Canvas = (props: Props) => {
       {/* Button container */}
       <div className="absolute bottom-4 right-4 flex gap-2 z-10">
         {/* Export button */}
-        <button
+        <Button
           onClick={handleExportImage}
-          className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
-          title="Export Canvas as Image"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          variant={"default"}
+          className="shadow-lg rounded-full"
+          size={"icon"}
           >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-        </button>
+          <LucideDownload size={20} />
+        </Button>
         
         {/* Center button */}
-        <button
+        <Button
           onClick={handleCenter}
-          className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
-          title="Center Canvas"
+          variant={"default"}
+          className=" shadow-lg rounded-full"
+          size={"icon"}
+
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 1v6m0 6v6" />
-            <path d="m21 12-6 0m-6 0-6 0" />
-          </svg>
-        </button>
+          <LucideTarget size={20} />
+        </Button>
       </div>
     </div>
   );
