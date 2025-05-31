@@ -48,7 +48,7 @@ const client = createClient({
     "pk_dev_7NjVi0ycMqKpfqN6eyhfpDVAt7m8uktB2Q8n2tc8uOe7R0HX_2OBqOeK8BzgGvUr",
 });
 
-export const useCanvasEditorStore = create<WithLiveblocks<State>>()(
+export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
   devtools(
     immer(
       liveblocks(
@@ -69,6 +69,14 @@ export const useCanvasEditorStore = create<WithLiveblocks<State>>()(
             selectedItems: [],
           },
           id: "test-draft-id-1234",
+          updateClientLive: (updates: Partial<VideoDraftState['clientLive']>) => {
+            set((state) => {
+              state.clientLive = {
+                ...state.clientLive,
+                ...updates,
+              };
+            });
+          },
           addStage: (stage: Omit<DStage, "id" | "metadata">) => {
             console.log("[addStage]");
           },

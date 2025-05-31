@@ -41,13 +41,21 @@ const Canvas = (props: Props) => {
   const stageRef = useRef<Konva.Stage>(null);
   const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState<{ x: number; y: number }>({ x: 1, y: 1 });
+  const updateClientLive = useCanvasEditorStore((state) => state.updateClientLive);
+  
+  const draftId = useCanvasEditorStore((state) => state.id);
+
+  useEffect(() => {
+
+
+    updateClientLive({ cursorPosition: { x: 0, y: 0 }, selectedItems: [] });
+  }, [updateClientLive]);
 
 
   const {
     liveblocks: { enterRoom, leaveRoom },
   } = useCanvasEditorStore();
 
-  const draftId = useCanvasEditorStore((state) => state.id);
 
 
   useEffect(() => {
@@ -60,18 +68,21 @@ const Canvas = (props: Props) => {
   useEffect(() => {
     const updateViewport = () => {
       if (containerRef.current) {
-        setViewport(getFittingViewport({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight,
-        }));
+        updateClientLive({
+          stageViewBox: {
+            x: containerRef.current.clientWidth,
+            y: containerRef.current.clientHeight,
+          },
+        });
       }
+
     };
 
     updateViewport();
 
     window.addEventListener("resize", updateViewport);
     return () => window.removeEventListener("resize", updateViewport);
-  }, []);
+  }, [updateClientLive]);
 
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
@@ -95,12 +106,19 @@ const Canvas = (props: Props) => {
 
     stage.scale({ x: newScale, y: newScale });
 
+    updateClientLive({
+      stageScale: { x: newScale, y: newScale },
+    });
+
     const newPos = {
       x: pointer.x - mousePointTo.x * newScale,
       y: pointer.y - mousePointTo.y * newScale,
     };
 
     stage.position(newPos);
+    updateClientLive({
+      stagePosition: { x: newPos.x, y: newPos.y },
+    });
     setScale({ x: newScale, y: newScale });
   };
 
@@ -196,6 +214,14 @@ const Canvas = (props: Props) => {
           scaleX={getInitialScale()}
           scaleY={getInitialScale()}
           onWheel={handleWheel}
+          onMouseMove={(e) => {
+            updateClientLive({
+              cursorPosition: {
+                x: e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
+                y: e.evt.clientY - containerRef.current!.getBoundingClientRect().top,
+              },
+            });
+          }}
         >
           {/* Content layers */}
           <Layer>
@@ -209,6 +235,7 @@ const Canvas = (props: Props) => {
               />
             </Group>
           </Layer>
+          
 
           {/* Background and overlay layer */}
           <Layer listening={false}>

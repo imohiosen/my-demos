@@ -322,6 +322,8 @@ export interface VideoDraftActions {
         type: "element" | "text" | "avatar" | "media" | "background" | "audio-caption",
         attributes: Partial<DElementProps | DTextProps | DAvatarProps | DMediaProps | DBackgroundProps | DAudioCaptionProps>
     ) => void;
+
+    updateClientLive: (updates: Partial<VideoDraftState['clientLive']>) => void;
 }
 
 // Helper function to generate unique IDs
