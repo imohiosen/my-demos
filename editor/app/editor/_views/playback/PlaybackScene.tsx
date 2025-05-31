@@ -1,7 +1,8 @@
-"use client";
+"use client";;
 import { Button } from "@/components/ui/button";
 import { LucideRedo } from "lucide-react";
-import { useCanvasStore } from "../../_utils/zustand/canvas/canvasStore";
+import { usePresenceStore } from "../../_utils/zustand/konva/impl";
+import { useCallback } from "react";
 
 type Props = {
   sceneId: string;
@@ -9,13 +10,13 @@ type Props = {
 
 // react functional component
 const PlaybackScene = ({ sceneId }: Props) => {
-  const selectedSceneId = useCanvasStore((state) => state.present.selectedSceneId);
-  const isSelected = selectedSceneId === sceneId;
-  const selectScene = useCanvasStore((state) => state.selectScene);
+  const selectedStageId = usePresenceStore((state) => state.selectedStageId);
+  const updateSelectedStageId = usePresenceStore((state) => state.updateSelectedStageId);
+  const isSelected = selectedStageId === sceneId;
 
-  const handleClick = () => {
-    selectScene(sceneId);
-  };
+  const handleClick = useCallback(() => {
+    updateSelectedStageId(sceneId);
+  }, [sceneId, updateSelectedStageId]);
 
   return (
     <>

@@ -1,9 +1,8 @@
-"use client";
+"use client";;
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LucidePlay, LucidePlus } from "lucide-react";
 import PlaybackScene from "./PlaybackScene";
-import { useCanvasStore } from "../../_utils/zustand/canvas/canvasStore";
 import { useCanvasEditorStore } from "../../_utils/zustand/konva/impl";
 
 type Props = {

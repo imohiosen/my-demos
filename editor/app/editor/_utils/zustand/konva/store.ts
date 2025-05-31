@@ -230,11 +230,13 @@ export type Presence = {
     stagePosition?: Point; // Position of the stage
     stageViewBox?: Point; // Height of the stage
     stageScale?: Point; // Scale of the stage
+    selectedStageId?: string; // ID of the selected group
     updateCursorPosition: (position: Point) => void; // Update cursor position
     updateSelectedItems: (items: Selection[]) => void; // Update selected items
     updateStagePosition: (position: Point) => void; // Update stage position
     updateStageViewBox: (viewBox: Point) => void; // Update stage view box
     updateStageScale: (scale: Point) => void; // Update stage scale
+    updateSelectedStageId: (stageId: string) => void; // Update selected group ID
 }
 
 
@@ -330,6 +332,7 @@ export interface VideoDraftActions {
     ) => void;
 
     updateClientLive: (updates: Partial<VideoDraftState['clientLive']>) => void;
+    getStageById: (stageId: string) => DStage | undefined;
 }
 
 // Helper function to generate unique IDs

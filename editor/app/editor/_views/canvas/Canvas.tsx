@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { use, useCallback, useEffect, useRef, useState } from "react";
-import { Group, Layer, Rect, Stage } from "react-konva";
+import { Group, Layer, Rect, Stage, Text } from "react-konva";
 import Konva from "konva";
 import { useCanvasEditorStore, usePresenceStore } from "../../_utils/zustand/konva/impl";
 import { VideoDraftState } from "../../_utils/zustand/konva/store";
 import throttle from "lodash/throttle";
 import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -56,10 +57,13 @@ const Canvas = (props: Props) => {
   const updateStagePosition = usePresenceStore((state) => state.updateStagePosition);
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
   const updateStageViewBox = usePresenceStore((state) => state.updateStageViewBox);
+  const selectedStageId = usePresenceStore((state) => state.selectedStageId);
   const stageViewBox = usePresenceStore((state) => state.stageViewBox);
 
   const enterRoom = useCanvasEditorStore((state) => state.liveblocks.enterRoom);
   const leaveRoom = useCanvasEditorStore((state) => state.liveblocks.leaveRoom);
+  const getStageById = useCanvasEditorStore((state) => state.getStageById);
+  const currentStage = getStageById(selectedStageId!)
   
   
   // Create throttled functions once, not on every call
@@ -271,6 +275,15 @@ const Canvas = (props: Props) => {
       </div>
     );
   }
+  if (!currentStage) {
+    return (
+      <div className="h-full w-full p-8 relative">
+        <div className="flex items-center justify-center h-full w-full" ref={containerRef}>
+          <p className="text-gray-500">No scene selected</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full p-8 relative">
@@ -290,19 +303,51 @@ const Canvas = (props: Props) => {
         >
 
           {/* Content layers */}
+          { currentStage && currentStage.layers.map((layer) => (
+            <Layer
+              key={layer.id}
+              {...layer.attributes}
+            >
+              {layer.groups.map((group) => {
+                  
+                return (
+                  <Group
+                    key={group.id}
+                    {...group.attributes}
+                  >
+                    {group.components.map((shape) => {
+                      <>
+                      <Rect
+                        key={shape.id}
+                        width={100}
+                        height={100}
+                        fill={"#f0f0f0"}
+                        stroke="black"
+                        strokeWidth={2}
+                        
+                        />
+                        <Text 
+                        key={shape.id+'1'} 
+                        text={ "No Text"}
+                        x={0}
+                        y={0}
+                        fontSize={72}
+                        fill="black"
+                        fontFamily="Arial"
+                        align="center"
+                        verticalAlign="middle"
+                        width={100}
+                        height={100}
+                        listening={false}
+                        />
+                        </>
+                    })}
+                  </Group>
+                );
+              })}
+            </Layer>
+          ))}
 
-
-          <Layer>
-            <Group>
-              <Rect
-                width={100}
-                height={100}
-                fill="red"
-                stroke="black"
-                draggable={true}
-              />
-            </Group>
-          </Layer>
           
 
           {/* Background and overlay layer */}
@@ -314,8 +359,8 @@ const Canvas = (props: Props) => {
                 y={0}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                fill="yellow"
-                stroke="black"
+                fill="transparent"
+                stroke="transparent"
                 offsetX={CANVAS_WIDTH / 2}
                 offsetY={CANVAS_HEIGHT / 2}
               />

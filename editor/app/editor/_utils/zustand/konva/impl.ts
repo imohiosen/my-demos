@@ -2,7 +2,7 @@ import { liveblocks, WithLiveblocks } from "@liveblocks/zustand";
 import { create } from "zustand";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Selection } from "./store";
+import { DGroupProps, DLayerProps, Selection } from "./store";
 import {
   DAudio,
   DAudioCaptionProps,
@@ -73,7 +73,19 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               const newStage: DStage = {
                 id: generateId(),
                 name: `Stage ${state.current.stages.length + 1}`,
-                layers: [],
+                layers: [
+                  {
+                    id: generateId(),
+                    groups: [
+                      {
+                        id: generateId(),
+                        components: [],
+                        attributes: {} as DGroupProps,
+                      },
+                    ],
+                    attributes: {} as DLayerProps,
+                  },
+                ],
               };
               state.current.stages = [
                 ...state.current.stages,
@@ -277,6 +289,11 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             console.log("[loadTemplate]");
           },
           selectedStage: () => {},
+          getStageById(stageId) {
+            const state = get();
+            const stage = state.current.stages.find((s) => s.id === stageId);
+            return stage;
+          },
           updateComponentAttributes: (
             componentId: string,
             groupId: string,
@@ -361,6 +378,11 @@ export const usePresenceStore = create<WithLiveblocks<Presence>>()(
             state.stageScale = scale;
           }); // Update stage scale
         },
+        updateSelectedStageId: (stageId: string) => {
+          set((state) => {
+              state.selectedStageId = stageId;
+          }); // Update selected stage ID
+        },
       }),
       {
         client,
@@ -370,6 +392,7 @@ export const usePresenceStore = create<WithLiveblocks<Presence>>()(
           stagePosition: true,
           stageScale: true,
           stageViewBox: true,
+          selectedStageId: true,
         },
       }
     ))
