@@ -114,7 +114,7 @@ const Canvas = (props: Props) => {
     
     const stage = stageRef.current;
     if (!stage) return;
-
+    
     const oldScale = stage.scaleX();
     const pointer = stage.getPointerPosition();
     if (!pointer) return;
@@ -161,6 +161,38 @@ const Canvas = (props: Props) => {
 
     throttledUpdateStagePosition(container.clientWidth / 2, container.clientHeight / 2);
     throttledUpdateStageScale(fitScale, fitScale);
+  };
+
+  const handleExportImage = () => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    
+    // Create a temporary in-memory canvas with just the size of our actual canvas
+    
+    // Clone the main layer for export
+    // Position all elements relative to canvas bounds
+    // Generate data URL
+    const dataURL = stage.toDataURL({ 
+      pixelRatio: 2, // Higher quality
+      mimeType: 'image/png',
+      x: 0,
+      y: 0,
+      width: 1920 ,
+      height: 1080,
+      
+    });
+
+    console.log("Exporting image with data URL:", dataURL);
+    
+    const link = document.createElement('a');
+    link.download = 'canvas-export.png';
+    link.href = dataURL;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    // tempStage.destroy();
   };
 
   const handleDrag = (e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -278,7 +310,8 @@ const Canvas = (props: Props) => {
                 y={0}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                fill="transparent"
+                fill="yellow"
+                stroke="black"
                 offsetX={CANVAS_WIDTH / 2}
                 offsetY={CANVAS_HEIGHT / 2}
               />
@@ -289,27 +322,52 @@ const Canvas = (props: Props) => {
         </Stage>
       </div>
       
-      {/* Center button */}
-      <button
-        onClick={handleCenter}
-        className="absolute bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-colors duration-200 z-10"
-        title="Center Canvas"
-      >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      {/* Button container */}
+      <div className="absolute bottom-4 right-4 flex gap-2 z-10">
+        {/* Export button */}
+        <button
+          onClick={handleExportImage}
+          className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
+          title="Export Canvas as Image"
         >
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 1v6m0 6v6" />
-          <path d="m21 12-6 0m-6 0-6 0" />
-        </svg>
-      </button>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </button>
+        
+        {/* Center button */}
+        <button
+          onClick={handleCenter}
+          className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
+          title="Center Canvas"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 1v6m0 6v6" />
+            <path d="m21 12-6 0m-6 0-6 0" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 };
