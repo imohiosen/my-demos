@@ -209,20 +209,6 @@ const Canvas = (props: Props) => {
               />
             </Group>
           </Layer>
-          
-          <Layer>
-            <Group>
-              <Rect
-                x={CANVAS_WIDTH * OVERLAY_MULTIPLIER}
-                y={CANVAS_WIDTH * OVERLAY_MULTIPLIER}
-                width={100}
-                height={100}
-                fill="blue"
-                stroke="black"
-                draggable={true}
-              />
-            </Group>
-          </Layer>
 
           {/* Background and overlay layer */}
           <Layer listening={false}>
