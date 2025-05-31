@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import { Group, Layer, Rect, Stage } from "react-konva";
 import Konva from "konva";
-import { useCanvasEditorStore } from "../../_utils/zustand/konva/impl";
+import { useCanvasEditorStore, usePresenceStore } from "../../_utils/zustand/konva/impl";
 import { VideoDraftState } from "../../_utils/zustand/konva/store";
-import { debounce, throttle } from "lodash";
+import throttle from "lodash/throttle";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -22,6 +23,8 @@ function getFittingViewport(viewport: { width: number; height: number }) {
   const maxWidth = viewport.width;
   const maxHeight = viewport.height;
 
+  
+
   const widthBasedHeight = maxWidth / aspectRatio;
   const heightBasedWidth = maxHeight * aspectRatio;
 
@@ -38,21 +41,48 @@ function getFittingViewport(viewport: { width: number; height: number }) {
   }
 }
 
+const THROTTLE_DELAY = 200; // Adjust as needed for performance
+
 const Canvas = (props: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState<{ x: number; y: number }>({ x: 1, y: 1 });
-  const updateClientLive = useCanvasEditorStore((state) => state.updateClientLive);
+
+
+
+  const updateCursorPosition = usePresenceStore((state) => state.updateCursorPosition);
+  const updateStagePosition = usePresenceStore((state) => state.updateStagePosition);
+  const updateStageScale = usePresenceStore((state) => state.updateStageScale);
+  const updateStageViewBox = usePresenceStore((state) => state.updateStageViewBox);
+  const stageViewBox = usePresenceStore((state) => state.stageViewBox);
+
+  // Create throttled functions once, not on every call
+  const throttledUpdateCursorPosition = useCallback(
+    throttle((x: number, y: number) => updateCursorPosition({ x, y }), THROTTLE_DELAY),
+    [updateCursorPosition]
+  );
+  
+  const throttledUpdateStagePosition = useCallback(
+    throttle((x: number, y: number) => updateStagePosition({ x, y }), THROTTLE_DELAY),
+    [updateStagePosition]
+  );
+  
+  const throttledUpdateStageScale = useCallback(
+    throttle((x: number, y: number) => updateStageScale({ x, y }), THROTTLE_DELAY),
+    [updateStageScale]
+  );
+  
+  const throttledUpdateStageViewBox = useCallback(
+    throttle((x: number, y: number) => updateStageViewBox({ x, y }), THROTTLE_DELAY),
+    [updateStageViewBox]
+  );
+  
+  // Simple wrapper functions to call the throttled functions
+
 
 
   const draftId = useCanvasEditorStore((state) => state.id);
-  const updateLiveData = useCallback(
-    throttle((updates: Partial<VideoDraftState['clientLive']>) => {
-      updateClientLive(updates);
-    }, 500),
-    [updateClientLive]
-  );
+
 
 
 
@@ -60,10 +90,21 @@ const Canvas = (props: Props) => {
     liveblocks: { enterRoom, leaveRoom },
   } = useCanvasEditorStore();
 
-
+  const enterPresenceRoom = usePresenceStore((state) => state.liveblocks.enterRoom);
+  const leavePresenceRoom = usePresenceStore((state) => state.liveblocks.leaveRoom);
 
   useEffect(() => {
-    enterRoom(draftId);
+  }, []);
+
+  useEffect(() => {
+    enterPresenceRoom("presence/" + draftId);
+    return () => {
+      leavePresenceRoom();
+    };
+  }, [enterPresenceRoom, leavePresenceRoom, draftId]);
+
+  useEffect(() => {
+    enterRoom("storage/" + draftId);
     return () => {
       leaveRoom();
     };
@@ -72,21 +113,18 @@ const Canvas = (props: Props) => {
   useEffect(() => {
     const updateViewport = () => {
       if (containerRef.current) {
-        updateLiveData({
-          stageViewBox: {
-            x: containerRef.current.clientWidth,
-            y: containerRef.current.clientHeight,
-          },
-        });
+        throttledUpdateStageViewBox(
+          containerRef.current.clientWidth,
+          containerRef.current.clientHeight
+        );
       }
-
     };
 
     updateViewport();
 
     window.addEventListener("resize", updateViewport);
     return () => window.removeEventListener("resize", updateViewport);
-  }, [updateLiveData]);
+  }, [throttledUpdateStageViewBox]);
 
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
@@ -117,10 +155,8 @@ const Canvas = (props: Props) => {
 
     stage.position(newPos);
     setScale({ x: newScale, y: newScale });
-    updateLiveData({
-      stagePosition: { x: newPos.x, y: newPos.y },
-      stageScale: { x: newScale, y: newScale },
-    });
+    throttledUpdateStagePosition(newPos.x, newPos.y);
+    throttledUpdateStageScale(newScale, newScale);
   };
 
   const handleCenter = () => {
@@ -142,10 +178,8 @@ const Canvas = (props: Props) => {
 
 
     setScale({ x: fitScale, y: fitScale });
-    updateLiveData({
-      stagePosition: { x: container.clientWidth / 2, y: container.clientHeight / 2 },
-      stageScale: { x: fitScale, y: fitScale },
-    });
+    throttledUpdateStagePosition(container.clientWidth / 2, container.clientHeight / 2);
+    throttledUpdateStageScale(fitScale, fitScale);
   };
 
   const handleDrag = (e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -154,18 +188,14 @@ const Canvas = (props: Props) => {
     const container = containerRef.current;
     
     const pos = stage.getPosition();
-    updateLiveData({
-      stagePosition: { x: pos.x, y: pos.y },
-    });
+    throttledUpdateStagePosition(pos.x, pos.y);
   };
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-      updateLiveData({
-        cursorPosition: {
-          x: e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
-          y: e.evt.clientY - containerRef.current!.getBoundingClientRect().top,
-        },
-      });
+    throttledUpdateCursorPosition(
+      e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
+      e.evt.clientY - containerRef.current!.getBoundingClientRect().top
+    );
   };
 
   const getInitialScale = () => {

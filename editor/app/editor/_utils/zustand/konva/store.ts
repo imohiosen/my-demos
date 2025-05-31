@@ -1,3 +1,4 @@
+import { WithLiveblocks } from '@liveblocks/zustand';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Remove conflicting imports and fix type naming
@@ -221,16 +222,21 @@ export type VideoDraftState = {
         future: VideoDraft[];
         maxHistorySize: number;
     };
-    clientLive: {
-        cursorPosition: Point; // Current cursor position
-        selectedItems?: Selection[]; // Array of selected items
-        stagePosition?: Point; // Position of the stage
-        stageViewBox?: Point; // Height of the stage
-        stageScale?: Point; // Scale of the stage
-
-        
-    }
 }
+
+export type Presence = {
+    cursorPosition: Point; // Current cursor position
+    selectedItems?: Selection[]; // Array of selected items
+    stagePosition?: Point; // Position of the stage
+    stageViewBox?: Point; // Height of the stage
+    stageScale?: Point; // Scale of the stage
+    updateCursorPosition: (position: Point) => void; // Update cursor position
+    updateSelectedItems: (items: Selection[]) => void; // Update selected items
+    updateStagePosition: (position: Point) => void; // Update stage position
+    updateStageViewBox: (viewBox: Point) => void; // Update stage view box
+    updateStageScale: (scale: Point) => void; // Update stage scale
+}
+
 
 export interface CanvasDisplayParams {
     mode: Orientation;

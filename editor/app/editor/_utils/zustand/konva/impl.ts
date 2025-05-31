@@ -2,6 +2,7 @@ import { liveblocks, WithLiveblocks } from "@liveblocks/zustand";
 import { create } from "zustand";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Selection } from "./store";
 import {
   DAudio,
   DAudioCaptionProps,
@@ -14,6 +15,8 @@ import {
   DMediaProps,
   DStage,
   DTextProps,
+  Point,
+  Presence,
   VideoDraftActions,
   VideoDraftState,
 } from "./store";
@@ -64,19 +67,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             future: [],
             maxHistorySize: 100,
           },
-          clientLive: {
-            cursorPosition: { x: 0, y: 0 },
-            selectedItems: [],
-          },
-          id: "test-draft-id-1234",
-          updateClientLive: (updates: Partial<VideoDraftState['clientLive']>) => {
-            set((state) => {
-              state.clientLive = {
-                ...state.clientLive,
-                ...updates,
-              };
-            });
-          },
+          id: "test-001",
           addStage: (stage: Omit<DStage, "id" | "metadata">) => {
             console.log("[addStage]");
           },
@@ -274,9 +265,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
           loadTemplate: (templateId: string) => {
             console.log("[loadTemplate]");
           },
-          selectedStage: () => {
-
-          },
+          selectedStage: () => {},
           updateComponentAttributes: (
             componentId: string,
             groupId: string,
@@ -321,13 +310,58 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
           storageMapping: {
             current: true,
           },
-          presenceMapping: {
-            // Define presence properties here if needed
-            clientLive: true
-          },
         }
       )
     )
+  )
+);
+
+export const usePresenceStore = create<WithLiveblocks<Presence>>()(
+  devtools(
+    immer(liveblocks(
+      (set) => ({
+        cursorPosition: { x: 0, y: 0 },
+        selectedItems: [],
+        stagePosition: { x: 0, y: 0 },
+        stageScale: { x: 1, y: 1 },
+        stageViewBox: { x: 0, y: 0 },
+        updateCursorPosition: (position: Point) => {
+          set((state) => {
+            state.cursorPosition = position;
+          });
+        }, // Update cursor position
+        updateSelectedItems: (items: Selection[]) => {
+          set((state) => {
+            state.selectedItems = items;
+          });
+        }, // Update selected items
+        updateStagePosition: (position: Point) => {
+          set((state) => {
+            state.stagePosition = position;
+          }); // Update stage position
+        },
+        updateStageViewBox: (viewBox: Point) => {
+          set((state) => {
+            state.stageViewBox = viewBox;
+          }); // Update stage view box
+        },
+        updateStageScale: (scale: Point) => {
+          set((state) => {
+            state.stageScale = scale;
+          }); // Update stage scale
+        },
+      }),
+      {
+        client,
+        presenceMapping: {
+          cursorPosition: true,
+          selectedItems: true,
+          stagePosition: true,
+          stageScale: true,
+          stageViewBox: true,
+        },
+      }
+    ))
   )
 );
 
