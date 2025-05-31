@@ -216,13 +216,20 @@ export type Selection = {
 export type VideoDraftState = {
     id: string; // Unique identifier for the draft
     current: VideoDraft;
-    selectedItems: Selection[]; // Array of selected items
     history: {
         past: VideoDraft[];
         future: VideoDraft[];
         maxHistorySize: number;
     };
-    cursor?: Point
+    clientLive: {
+        cursorPosition: Point; // Current cursor position
+        selectedItems?: Selection[]; // Array of selected items
+        stagePosition?: Point; // Position of the stage
+        stageViewBox?: Point; // Height of the stage
+        stageScale?: Point; // Scale of the stage
+
+        
+    }
 }
 
 export interface CanvasDisplayParams {

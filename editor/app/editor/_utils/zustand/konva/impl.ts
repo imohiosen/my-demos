@@ -55,18 +55,20 @@ export const useCanvasEditorStore = create<WithLiveblocks<State>>()(
         (set, get) => ({
           // Initial state
           current: {
-            id: get()?.id || "test-draft-id-221",
+            id: get()?.id || "",
             stages: [],
             portrait: "landscape",
           },
-          selectedItems: [],    
           history: {
             past: [],
             future: [],
             maxHistorySize: 100,
           },
-          cursor: { x: 0, y: 0 },
-          id: "test-draft-id-221",
+          clientLive: {
+            cursorPosition: { x: 0, y: 0 },
+            selectedItems: [],
+          },
+          id: "test-draft-id-1234",
           addStage: (stage: Omit<DStage, "id" | "metadata">) => {
             console.log("[addStage]");
           },
@@ -313,8 +315,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State>>()(
           },
           presenceMapping: {
             // Define presence properties here if needed
-            selectedItems: true,
-            cursor: true,
+            clientLive: true
           },
         }
       )
