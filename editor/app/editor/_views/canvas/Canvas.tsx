@@ -1,8 +1,10 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Group, Layer, Rect, Stage } from "react-konva";
 import Konva from "konva";
 import { useCanvasEditorStore } from "../../_utils/zustand/konva/impl";
+import { VideoDraftState } from "../../_utils/zustand/konva/store";
+import { debounce, throttle } from "lodash";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -42,14 +44,16 @@ const Canvas = (props: Props) => {
   const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState<{ x: number; y: number }>({ x: 1, y: 1 });
   const updateClientLive = useCanvasEditorStore((state) => state.updateClientLive);
-  
+
+
   const draftId = useCanvasEditorStore((state) => state.id);
+  const updateLiveData = useCallback(
+    throttle((updates: Partial<VideoDraftState['clientLive']>) => {
+      updateClientLive(updates);
+    }, 500),
+    [updateClientLive]
+  );
 
-  useEffect(() => {
-
-
-    updateClientLive({ cursorPosition: { x: 0, y: 0 }, selectedItems: [] });
-  }, [updateClientLive]);
 
 
   const {
@@ -68,7 +72,7 @@ const Canvas = (props: Props) => {
   useEffect(() => {
     const updateViewport = () => {
       if (containerRef.current) {
-        updateClientLive({
+        updateLiveData({
           stageViewBox: {
             x: containerRef.current.clientWidth,
             y: containerRef.current.clientHeight,
@@ -82,7 +86,7 @@ const Canvas = (props: Props) => {
 
     window.addEventListener("resize", updateViewport);
     return () => window.removeEventListener("resize", updateViewport);
-  }, [updateClientLive]);
+  }, [updateLiveData]);
 
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
@@ -106,20 +110,17 @@ const Canvas = (props: Props) => {
 
     stage.scale({ x: newScale, y: newScale });
 
-    updateClientLive({
-      stageScale: { x: newScale, y: newScale },
-    });
-
     const newPos = {
       x: pointer.x - mousePointTo.x * newScale,
       y: pointer.y - mousePointTo.y * newScale,
     };
 
     stage.position(newPos);
-    updateClientLive({
-      stagePosition: { x: newPos.x, y: newPos.y },
-    });
     setScale({ x: newScale, y: newScale });
+    updateLiveData({
+      stagePosition: { x: newPos.x, y: newPos.y },
+      stageScale: { x: newScale, y: newScale },
+    });
   };
 
   const handleCenter = () => {
@@ -137,8 +138,34 @@ const Canvas = (props: Props) => {
       x: container.clientWidth / 2,
       y: container.clientHeight / 2,
     });
+    
+
 
     setScale({ x: fitScale, y: fitScale });
+    updateLiveData({
+      stagePosition: { x: container.clientWidth / 2, y: container.clientHeight / 2 },
+      stageScale: { x: fitScale, y: fitScale },
+    });
+  };
+
+  const handleDrag = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const stage = stageRef.current;
+    if (!stage || !containerRef.current) return;  
+    const container = containerRef.current;
+    
+    const pos = stage.getPosition();
+    updateLiveData({
+      stagePosition: { x: pos.x, y: pos.y },
+    });
+  };
+
+  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+      updateLiveData({
+        cursorPosition: {
+          x: e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
+          y: e.evt.clientY - containerRef.current!.getBoundingClientRect().top,
+        },
+      });
   };
 
   const getInitialScale = () => {
@@ -214,14 +241,8 @@ const Canvas = (props: Props) => {
           scaleX={getInitialScale()}
           scaleY={getInitialScale()}
           onWheel={handleWheel}
-          onMouseMove={(e) => {
-            updateClientLive({
-              cursorPosition: {
-                x: e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
-                y: e.evt.clientY - containerRef.current!.getBoundingClientRect().top,
-              },
-            });
-          }}
+          onDragMove={handleDrag}
+          onMouseMove={handleMouseMove}
         >
           {/* Content layers */}
           <Layer>
