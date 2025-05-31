@@ -15,6 +15,7 @@ const CANVAS_HEIGHT = 1080;
 const ZOOM_SCALE_FACTOR = 1.1;
 const OVERLAY_MULTIPLIER = 5;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
 
 // Utility function
@@ -46,16 +47,19 @@ const THROTTLE_DELAY = 200; // Adjust as needed for performance
 const Canvas = (props: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  const [scale, setScale] = useState<{ x: number; y: number }>({ x: 1, y: 1 });
-
-
-
+  
+  const enterPresenceRoom = usePresenceStore((state) => state.liveblocks.enterRoom);
+  const leavePresenceRoom = usePresenceStore((state) => state.liveblocks.leaveRoom);
   const updateCursorPosition = usePresenceStore((state) => state.updateCursorPosition);
   const updateStagePosition = usePresenceStore((state) => state.updateStagePosition);
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
   const updateStageViewBox = usePresenceStore((state) => state.updateStageViewBox);
   const stageViewBox = usePresenceStore((state) => state.stageViewBox);
 
+  const enterRoom = useCanvasEditorStore((state) => state.liveblocks.enterRoom);
+  const leaveRoom = useCanvasEditorStore((state) => state.liveblocks.leaveRoom);
+  
+  
   // Create throttled functions once, not on every call
   const throttledUpdateCursorPosition = useCallback(
     throttle((x: number, y: number) => updateCursorPosition({ x, y }), THROTTLE_DELAY),
@@ -76,39 +80,18 @@ const Canvas = (props: Props) => {
     throttle((x: number, y: number) => updateStageViewBox({ x, y }), THROTTLE_DELAY),
     [updateStageViewBox]
   );
-  
-  // Simple wrapper functions to call the throttled functions
-
-
-
   const draftId = useCanvasEditorStore((state) => state.id);
-
-
-
-
-  const {
-    liveblocks: { enterRoom, leaveRoom },
-  } = useCanvasEditorStore();
-
-  const enterPresenceRoom = usePresenceStore((state) => state.liveblocks.enterRoom);
-  const leavePresenceRoom = usePresenceStore((state) => state.liveblocks.leaveRoom);
-
-  useEffect(() => {
-  }, []);
-
+  
   useEffect(() => {
     enterPresenceRoom("presence/" + draftId);
-    return () => {
-      leavePresenceRoom();
-    };
-  }, [enterPresenceRoom, leavePresenceRoom, draftId]);
-
-  useEffect(() => {
     enterRoom("storage/" + draftId);
     return () => {
       leaveRoom();
+      leavePresenceRoom();
     };
-  }, [enterRoom, leaveRoom, draftId]);
+  }, [enterRoom, leaveRoom, enterPresenceRoom, leavePresenceRoom, draftId]);
+
+
 
   useEffect(() => {
     const updateViewport = () => {
@@ -154,7 +137,6 @@ const Canvas = (props: Props) => {
     };
 
     stage.position(newPos);
-    setScale({ x: newScale, y: newScale });
     throttledUpdateStagePosition(newPos.x, newPos.y);
     throttledUpdateStageScale(newScale, newScale);
   };
@@ -177,7 +159,6 @@ const Canvas = (props: Props) => {
     
 
 
-    setScale({ x: fitScale, y: fitScale });
     throttledUpdateStagePosition(container.clientWidth / 2, container.clientHeight / 2);
     throttledUpdateStageScale(fitScale, fitScale);
   };
@@ -206,7 +187,7 @@ const Canvas = (props: Props) => {
     );
   };
 
-  const renderOverlays = () => (
+  const BgOverlay = () => (
     <>
       {/* Top overlay */}
       <Rect
@@ -302,7 +283,7 @@ const Canvas = (props: Props) => {
                 offsetY={CANVAS_HEIGHT / 2}
               />
               
-              {renderOverlays()}
+              <BgOverlay />
             </Group>
           </Layer>
         </Stage>
