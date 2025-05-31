@@ -9,7 +9,6 @@ export function Room() {
   const setText = useStore((state) => state.setText);
   const cursor = useStore((state) => state.cursor);
   const others = useStore((state) => state.liveblocks.others);
-  const liveblocks = useStore((state) => state.liveblocks.others);
     const setCursor = useStore((state) => state.setCursor);
 
   useEffect(() => {
@@ -21,7 +20,7 @@ export function Room() {
 
   const userCount = others.length;
   return (
-    <div className="h-full w-full flex items-center justify-center" onPointerMove={(e) => {
+    <div className="h-screen w-screen flex items-center justify-center" onPointerMove={(e) => {
       const x = e.clientX;
       const y = e.clientY;
       setCursor({ x, y });

@@ -4,6 +4,7 @@ import {create} from "zustand";
 import { createClient } from "@liveblocks/client";
 import { liveblocks } from "@liveblocks/zustand";
 import type { WithLiveblocks } from "@liveblocks/zustand";
+import { devtools } from "zustand/middleware";
 
 type State = {
   text: string;
@@ -17,7 +18,7 @@ const client = createClient({
 });
 
 const useStore = create<WithLiveblocks<State>>()(
-  liveblocks(
+  devtools(liveblocks(
     (set) => ({
       text: "",
       cursor: { x: 0, y: 0 },
@@ -31,8 +32,7 @@ const useStore = create<WithLiveblocks<State>>()(
       presenceMapping: {
         // Define presence properties here if needed
         cursor: true,
-      },
-    })
+      }, }))
 );
 
 export default useStore;
