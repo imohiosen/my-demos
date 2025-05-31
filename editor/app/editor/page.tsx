@@ -11,6 +11,7 @@ import CanvasView from "./_views/canvas/CanvasView";
 import CanvasContextMenu from "./_components/context-menus/CanvasContextMenu";
 
 export default function Page() {
+  
   return (
     <>
       <CanvasContextMenu /> 

@@ -201,10 +201,8 @@ export type DStage = { // Renamed from Stage to avoid conflict
 
 export type VideoDraft = {
     id: string;
-    version: string;
     stages: DStage[];
-    width: number; // Width of the video draft
-    height: number; // Height of the video draft
+    portrait: Orientation
 }
 
 export type Selection = {
@@ -216,19 +214,15 @@ export type Selection = {
 }
 // Improved state with better history management
 export type VideoDraftState = {
-    present: VideoDraft;
+    id: string; // Unique identifier for the draft
+    current: VideoDraft;
     selectedItems: Selection[]; // Array of selected items
     history: {
         past: VideoDraft[];
         future: VideoDraft[];
         maxHistorySize: number;
     };
-    liveUsers:{
-        [userId: string]: {
-            selections: selection[]; // Array of selections made by the user
-            cursorPosition: Point
-        };
-    }
+    cursor?: Point
 }
 
 export interface CanvasDisplayParams {

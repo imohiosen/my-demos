@@ -9,6 +9,8 @@ type Props = {};
 
 const CanvasView = (props: Props) => {
 
+  
+
   return (
     <div className="flex flex-col h-full w-full p-4 relative">
       <CanvasSelectionCtrl className='absolute w-full h-24 bg-white/10 backdrop-blur-xs' />

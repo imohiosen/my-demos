@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Group, Layer, Rect, Stage } from "react-konva";
 import Konva from "konva";
+import { useCanvasEditorStore } from "../../_utils/zustand/konva/impl";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -40,6 +41,21 @@ const Canvas = (props: Props) => {
   const stageRef = useRef<Konva.Stage>(null);
   const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
   const [scale, setScale] = useState<{ x: number; y: number }>({ x: 1, y: 1 });
+
+
+  const {
+    liveblocks: { enterRoom, leaveRoom },
+  } = useCanvasEditorStore();
+
+  const draftId = useCanvasEditorStore((state) => state.id);
+
+
+  useEffect(() => {
+    enterRoom(draftId);
+    return () => {
+      leaveRoom();
+    };
+  }, [enterRoom, leaveRoom, draftId]);
 
   useEffect(() => {
     const updateViewport = () => {
