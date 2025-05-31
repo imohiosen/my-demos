@@ -68,8 +68,19 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             maxHistorySize: 100,
           },
           id: "test-001",
-          addStage: (stage: Omit<DStage, "id" | "metadata">) => {
-            console.log("[addStage]");
+          addStage: () => {
+            set((state) => {
+              const newStage: DStage = {
+                id: generateId(),
+                name: `Stage ${state.current.stages.length + 1}`,
+                layers: [],
+              };
+              state.current.stages = [
+                ...state.current.stages,
+                newStage
+              ];
+            }
+            );
           },
           duplicateStage: (stageId: string) => {
             console.log("[duplicateStage]");

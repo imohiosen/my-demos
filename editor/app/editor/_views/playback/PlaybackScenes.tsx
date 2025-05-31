@@ -4,14 +4,16 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LucidePlay, LucidePlus } from "lucide-react";
 import PlaybackScene from "./PlaybackScene";
 import { useCanvasStore } from "../../_utils/zustand/canvas/canvasStore";
+import { useCanvasEditorStore } from "../../_utils/zustand/konva/impl";
 
 type Props = {
 };
 
 // react functional component
 const PlaybackScenes = (props: Props) => {
-  const scenes = useCanvasStore((state) => state.present.scenes);
-  const addScene = useCanvasStore((state) => state.addScene);
+  const addScene = useCanvasEditorStore((state) => state.addStage);
+  const scenes = useCanvasEditorStore((state) => state.current.stages);
+
 
   // Convert scenes object to array for rendering
   const sceneArray = Object.values(scenes || []);

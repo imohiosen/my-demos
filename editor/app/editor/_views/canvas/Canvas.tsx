@@ -288,7 +288,10 @@ const Canvas = (props: Props) => {
           onDragMove={handleDrag}
           onMouseMove={handleMouseMove}
         >
+
           {/* Content layers */}
+
+
           <Layer>
             <Group>
               <Rect

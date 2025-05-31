@@ -262,7 +262,7 @@ export interface CanvasDisplayParams {
 // Enhanced actions with better organization
 export interface VideoDraftActions {
     // Stage operations
-    addStage: (stage: Omit<DStage, 'id' | 'metadata'>) => void;
+    addStage: () => void;
     duplicateStage: (stageId: string) => void;
     updateStage: (stageId: string, updates: Partial<DStage>) => void;
     removeStage: (stageId: string) => void;
