@@ -16,12 +16,15 @@ export type DAvatar = {
 }
 
 export type DTextProps = {
-    content: string; // The text content
+    x: number; // X position of the text
+    y: number; // Y position of the text
+    text: string; // The text content
+    type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
+    fill?: string; // Optional fill color for the text
     fontSize?: number; // Optional font size
     fontFamily?: string; // Optional font family
     fontStyle?: string; // Optional font style (e.g., 'bold', 'italic')
     align?: string; // Optional text alignment (e.g., 'left', 'center', 'right')
-    type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
 
     stageId?: string; // Optional stage ID for context
     layerId?: string; // Optional layer ID for context
@@ -333,6 +336,12 @@ export interface VideoDraftActions {
 
     updateClientLive: (updates: Partial<VideoDraftState['clientLive']>) => void;
     getStageById: (stageId: string) => DStage | undefined;
+
+    addText: (
+        text: string,
+        style: Partial<DTextProps>,
+    ) => void;
+
 }
 
 // Helper function to generate unique IDs

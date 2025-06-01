@@ -12,7 +12,8 @@ import {
 	canvasBodyStyle,
 	canvasCaptionStyle,
 } from "../../../_utils/addTextStyles";
-import { useCanvasStore } from "../../../_utils/zustand/canvas/canvasStore";
+import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
+import { DTextProps } from "@/app/editor/_utils/zustand/konva/store";
 
 type Props = {
 	children?: React.ReactNode;
@@ -37,9 +38,10 @@ function X_Wrapper({
 }
 
 const AddText = (props: Props) => {
-  const addText = useCanvasStore((state) => state.addText);
+  const addText = useCanvasEditorStore((state) => state.addText);
 
-	const addTextToCanvas = (text: string, style: any) => {
+
+	const addTextToCanvas = (text: string, style: DTextProps) => {
 		addText(text, style);
 	};
 
@@ -51,7 +53,9 @@ const AddText = (props: Props) => {
 					<div className="flex flex-col gap-2">
 						<X_Wrapper
 							onClick={() =>
-								addTextToCanvas("Add Title", canvasTitleStyle)
+								addTextToCanvas("Add Title", {
+									
+								})
 							}
 						>
 							<p style={canvasTitleStyle}>Add Title</p>

@@ -23,6 +23,7 @@ import {
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { createClient } from "@liveblocks/client";
+import { title } from "process";
 
 type State = VideoDraftState;
 type Actions = VideoDraftActions;
@@ -330,6 +331,39 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
                 console.warn(
                   `Component ${componentId} does not have an element attribute to update.`
                 );
+            });
+          },
+          addText(text, style) {
+            set((state) => {
+              const stage = state.current.stages.find(
+                (s) => s.id === usePresenceStore.getState().selectedStageId
+              );
+              if (!stage) return;
+
+              const layer = stage.layers[0]; // Assuming adding to the first layer
+              if (!layer) return;
+
+              const group = layer.groups[0]; // Assuming adding to the first group
+              if (!group) return;
+
+              const newComponent: DComponent = {
+                id: generateId(),
+                type: "text",
+                text: {
+                  attribute: {
+                    x: 0,
+                    y: 0,
+                    type: 'title',
+                    text: text,
+                  }
+                },
+                metadata: createMetadata(),
+              };
+
+              group.components = [
+                ...group.components,
+                newComponent,
+              ];
             });
           },
         }),
