@@ -9,7 +9,7 @@ import {
 } from "../../_utils/zustand/konva/impl";
 import { VideoDraftState } from "../../_utils/zustand/konva/store";
 import throttle from "lodash/throttle";
-import { LucideDownload, LucideTarget } from "lucide-react";
+import { LucideDownload, LucideTarget, UndoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import XGroup from "./components/XGroup";
 import XText from "./components/XText";
@@ -71,6 +71,7 @@ const Canvas = (props: Props) => {
   const isPresenceOnline = usePresenceStore((state) => state.liveblocks.isStorageLoading);
   const getSelectionFromLocalStorage = usePresenceStore((state) => state.getSelectionFromLocalStorage);
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
+  const stageScale = usePresenceStore((state) => state.stageScale);
   const updateStageViewBox = usePresenceStore(
     (state) => state.updateStageViewBox
   );
@@ -361,8 +362,7 @@ const Canvas = (props: Props) => {
                               <XText
                                 key={component.id}
                                 {...component?.text?.attribute} 
-                                draggable
-                                onDragStart
+                                draggable={true}
                                 onDragEnd={(e: Konva.KonvaEventObject<DragEvent>) => handleTextDragEnd({
                                   componentId: component.id,
                                   groupId: group.id,

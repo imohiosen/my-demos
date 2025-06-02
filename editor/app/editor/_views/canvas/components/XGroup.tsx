@@ -5,7 +5,7 @@ type Props = GroupConfig
 
 const XGroup = (props: Props) => {
   return (
-    <div><Group {...props} /></div>
+    <Group {...props} draggable/>
   )
 }
 
