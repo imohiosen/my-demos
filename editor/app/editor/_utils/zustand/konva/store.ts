@@ -255,6 +255,10 @@ export type Presence = {
     updateStageViewBox: (viewBox: Point) => void; // Update stage view box
     updateStageScale: (scale: Point) => void; // Update stage scale
     updateSelectedStageId: (stageId: string) => void; // Update selected group ID
+
+    saveSelectionToLocalStorage: () => void;
+    getSelectionFromLocalStorage: () => string | null;
+
 }
 
 

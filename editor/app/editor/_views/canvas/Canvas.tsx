@@ -13,6 +13,7 @@ import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import XGroup from "./components/XGroup";
 import XText from "./components/XText";
+import { stages } from "konva/lib/Stage";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -65,6 +66,10 @@ const Canvas = (props: Props) => {
   const updateStagePosition = usePresenceStore(
     (state) => state.updateStagePosition
   );
+
+  const isCanvasOnline = useCanvasEditorStore((state) => state.liveblocks.isStorageLoading);
+  const isPresenceOnline = usePresenceStore((state) => state.liveblocks.isStorageLoading);
+  const getSelectionFromLocalStorage = usePresenceStore((state) => state.getSelectionFromLocalStorage);
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
   const updateStageViewBox = usePresenceStore(
     (state) => state.updateStageViewBox
@@ -87,6 +92,11 @@ const Canvas = (props: Props) => {
     ),
     [updateCursorPosition]
   );
+
+  useEffect(() => {
+    getSelectionFromLocalStorage();
+  }
+  , [getSelectionFromLocalStorage, currentStage, isCanvasOnline, isPresenceOnline]);
 
   const throttledUpdateStagePosition = useCallback(
     throttle(

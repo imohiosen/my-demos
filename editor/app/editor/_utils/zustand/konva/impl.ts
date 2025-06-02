@@ -26,6 +26,7 @@ import { createClient } from "@liveblocks/client";
 import { title } from "process";
 import { canvasTitleStyle } from "../../addTextStyles";
 import { text } from "stream/consumers";
+import Konva from "konva";
 
 type State = VideoDraftState;
 type Actions = VideoDraftActions;
@@ -166,7 +167,7 @@ export const usePresenceStore = create<WithLiveblocks<Presence>>()(
   devtools(
     immer(
       liveblocks(
-        (set) => ({
+        (set, get) => ({
           cursorPosition: { x: 0, y: 0 },
           selectedItems: [],
           stagePosition: { x: 0, y: 0 },
@@ -201,7 +202,34 @@ export const usePresenceStore = create<WithLiveblocks<Presence>>()(
             set((state) => {
               state.selectedStageId = stageId;
             }); // Update selected stage ID
+            get().saveSelectionToLocalStorage(); // Save to localStorage
+            console.log("Selected stage ID updated:", stageId);
           },
+          saveSelectionToLocalStorage: () => {
+            const id = get().selectedStageId;
+            const roomKey = get().liveblocks.room?.id as string;
+
+            if (!id) {
+              console.warn("No selected stage ID found");
+              return;
+            }
+            const selectionString = JSON.stringify(id);
+            localStorage.setItem(roomKey, selectionString);
+          },
+          getSelectionFromLocalStorage: () =>  {
+            const roomKey = get().liveblocks.room?.id as string;
+            console.log("Retrieving selection from localStorage");
+            const selectionString = localStorage.getItem(roomKey);
+            if (!selectionString) return null;
+            
+            try {
+              get().updateSelectedStageId(JSON.parse(selectionString) as string);
+              return JSON.parse(selectionString) as string;
+            } catch (error) {
+              console.error("Failed to parse selection from localStorage", error);
+              return null;
+            }
+          }
         }),
         {
           client,

@@ -12,6 +12,7 @@ type Props = {
 const PlaybackScene = ({ sceneId }: Props) => {
   const selectedStageId = usePresenceStore((state) => state.selectedStageId);
   const updateSelectedStageId = usePresenceStore((state) => state.updateSelectedStageId);
+  
   const isSelected = selectedStageId === sceneId;
 
   const handleClick = useCallback(() => {
