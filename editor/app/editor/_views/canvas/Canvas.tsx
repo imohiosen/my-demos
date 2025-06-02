@@ -11,6 +11,8 @@ import { VideoDraftState } from "../../_utils/zustand/konva/store";
 import throttle from "lodash/throttle";
 import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import XGroup from "./components/XGroup";
+import XText from "./components/XText";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -74,6 +76,8 @@ const Canvas = (props: Props) => {
   const leaveRoom = useCanvasEditorStore((state) => state.liveblocks.leaveRoom);
   const getStageById = useCanvasEditorStore((state) => state.getStageById);
   const currentStage = getStageById(selectedStageId!);
+
+  const handleTextDragEnd = useCanvasEditorStore((state) => state.handleTextDragEnd);
 
   // Create throttled functions once, not on every call
   const throttledUpdateCursorPosition = useCallback(
@@ -340,19 +344,27 @@ const Canvas = (props: Props) => {
               <Layer key={layer.id} {...layer.attributes}>
                 {layer.groups.map((group) => {
                   return (
-                    <Group key={group.id} {...group.attributes}>
+                    <XGroup key={group.id} {...group.attributes}>
                       {group.components.map((component) => {
                         if (component.type === "text") {
                           return (
-                              <Text
+                              <XText
                                 key={component.id}
                                 {...component?.text?.attribute} 
                                 draggable
+                                onDragStart
+                                onDragEnd={(e: Konva.KonvaEventObject<DragEvent>) => handleTextDragEnd({
+                                  componentId: component.id,
+                                  groupId: group.id,
+                                  layerId: layer.id,
+                                  stageId: currentStage.id,
+                                  type: "component",
+                                }, e)}
                               />
                           );
                         }
                       })}
-                    </Group>
+                    </XGroup>
                   );
                 })}
               </Layer>

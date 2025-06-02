@@ -1,4 +1,6 @@
 import { WithLiveblocks } from '@liveblocks/zustand';
+import Konva from 'konva';
+import { NodeConfig } from 'konva/lib/Node';
 import { TextConfig } from 'konva/lib/shapes/Text';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -33,7 +35,7 @@ export type DAvatar = {
 //     componentId?: string; // Optional component ID for context
 // }
 
-export type DTextProps = TextConfig | {
+export type DTextProps = TextConfig & NodeConfig & {
 
 
     type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
@@ -289,6 +291,8 @@ export interface VideoDraftActions {
         text: string,
         style: Partial<DTextProps>,
     ) => void;
+
+    handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;
 
 }
 

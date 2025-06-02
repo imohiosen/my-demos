@@ -25,6 +25,7 @@ import { immer } from "zustand/middleware/immer";
 import { createClient } from "@liveblocks/client";
 import { title } from "process";
 import { canvasTitleStyle } from "../../addTextStyles";
+import { text } from "stream/consumers";
 
 type State = VideoDraftState;
 type Actions = VideoDraftActions;
@@ -76,23 +77,19 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
                 id: generateId(),
                 name: `Stage ${state.current.stages.length + 1}`,
                 layer: {
-                    id: generateId(),
-                    groups: [
-                      {
-                        id: generateId(),
-                        components: [],
-                        attributes: {} as DGroupProps,
-                      },
-                    ],
-                    attributes: {} as DLayerProps,
-                  },
+                  id: generateId(),
+                  groups: [
+                    {
+                      id: generateId(),
+                      components: [],
+                      attributes: {} as DGroupProps,
+                    },
+                  ],
+                  attributes: {} as DLayerProps,
+                },
               };
-              state.current.stages = [
-                ...state.current.stages,
-                newStage
-              ];
-            }
-            );
+              state.current.stages = [...state.current.stages, newStage];
+            });
           },
           getStageById(stageId) {
             const state = get();
@@ -108,7 +105,6 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
 
               const layer = stage.layer; // Assuming adding to the first layer
               if (!layer) return;
-              
 
               const group = layer.groups[0]; // Assuming adding to the first group
               if (!group) return;
@@ -123,18 +119,35 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
                     fontSize: 96,
                     fontWeight: 700,
                     fontFamily: "Arial",
-                    type: 'title',
+                    type: "title",
                     text: text,
-                    
-                  }
+                  },
                 },
                 metadata: createMetadata(),
               };
 
-              group.components = [
-                ...group.components,
-                newComponent,
-              ];
+              group.components = [...group.components, newComponent];
+            });
+          },
+          handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => {
+            set((state) => {
+              const textComp = getComponentBySelection(selection, state);
+
+              if (textComp.type !== "text") {
+                console.error("Selected component is not a text component");
+                return
+              }
+              if (!textComp.text || !textComp.text.attribute) {
+                console.error("Text component does not have text attribute");
+                return;
+              } 
+              console.log("Dragging text component:", textComp.id);
+              console.log("Selection deltaX:", e);
+              
+              textComp.text.attribute = {...e?.target?.attrs};
+
+              
+
             });
           },
         }),
@@ -151,56 +164,58 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
 
 export const usePresenceStore = create<WithLiveblocks<Presence>>()(
   devtools(
-    immer(liveblocks(
-      (set) => ({
-        cursorPosition: { x: 0, y: 0 },
-        selectedItems: [],
-        stagePosition: { x: 0, y: 0 },
-        stageScale: { x: 1, y: 1 },
-        stageViewBox: { x: 0, y: 0 },
-        updateCursorPosition: (position: Point) => {
-          set((state) => {
-            state.cursorPosition = position;
-          });
-        }, // Update cursor position
-        updateSelectedItems: (items: Selection[]) => {
-          set((state) => {
-            state.selectedItems = items;
-          });
-        }, // Update selected items
-        updateStagePosition: (position: Point) => {
-          set((state) => {
-            state.stagePosition = position;
-          }); // Update stage position
-        },
-        updateStageViewBox: (viewBox: Point) => {
-          set((state) => {
-            state.stageViewBox = viewBox;
-          }); // Update stage view box
-        },
-        updateStageScale: (scale: Point) => {
-          set((state) => {
-            state.stageScale = scale;
-          }); // Update stage scale
-        },
-        updateSelectedStageId: (stageId: string) => {
-          set((state) => {
+    immer(
+      liveblocks(
+        (set) => ({
+          cursorPosition: { x: 0, y: 0 },
+          selectedItems: [],
+          stagePosition: { x: 0, y: 0 },
+          stageScale: { x: 1, y: 1 },
+          stageViewBox: { x: 0, y: 0 },
+          updateCursorPosition: (position: Point) => {
+            set((state) => {
+              state.cursorPosition = position;
+            });
+          }, // Update cursor position
+          updateSelectedItems: (items: Selection[]) => {
+            set((state) => {
+              state.selectedItems = items;
+            });
+          }, // Update selected items
+          updateStagePosition: (position: Point) => {
+            set((state) => {
+              state.stagePosition = position;
+            }); // Update stage position
+          },
+          updateStageViewBox: (viewBox: Point) => {
+            set((state) => {
+              state.stageViewBox = viewBox;
+            }); // Update stage view box
+          },
+          updateStageScale: (scale: Point) => {
+            set((state) => {
+              state.stageScale = scale;
+            }); // Update stage scale
+          },
+          updateSelectedStageId: (stageId: string) => {
+            set((state) => {
               state.selectedStageId = stageId;
-          }); // Update selected stage ID
-        },
-      }),
-      {
-        client,
-        presenceMapping: {
-          cursorPosition: true,
-          selectedItems: true,
-          stagePosition: true,
-          stageScale: true,
-          stageViewBox: true,
-          selectedStageId: true,
-        },
-      }
-    ))
+            }); // Update selected stage ID
+          },
+        }),
+        {
+          client,
+          presenceMapping: {
+            cursorPosition: true,
+            selectedItems: true,
+            stagePosition: true,
+            stageScale: true,
+            stageViewBox: true,
+            selectedStageId: true,
+          },
+        }
+      )
+    )
   )
 );
 
@@ -214,7 +229,7 @@ function getComponent(
   const stage = state.current.stages.find((s) => s.id === stageId);
   if (!stage) throw new Error(`Stage with id ${stageId} not found`);
 
-  const layer = stage.layer
+  const layer = stage.layer;
   if (!layer)
     throw new Error(`Layer with id ${layerId} not found in stage ${stageId}`);
 
@@ -229,4 +244,15 @@ function getComponent(
       `Component with id ${componentId} not found in group ${groupId}, layer ${layerId}, stage ${stageId}`
     );
   return c;
+}
+
+function getComponentBySelection(
+  selection: Selection,
+  state: VideoDraftState
+): DComponent {
+  const { componentId, groupId, layerId, stageId } = selection;
+  if (!componentId || !groupId || !layerId || !stageId) {
+    throw new Error("Selection is incomplete");
+  }
+  return getComponent(componentId, groupId, layerId, stageId, state);
 }
