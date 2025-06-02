@@ -67,16 +67,16 @@ const Canvas = (props: Props) => {
     (state) => state.updateStagePosition
   );
 
-  const isCanvasOnline = useCanvasEditorStore((state) => state.liveblocks.isStorageLoading);
-  const isPresenceOnline = usePresenceStore((state) => state.liveblocks.isStorageLoading);
-  const getSelectionFromLocalStorage = usePresenceStore((state) => state.getSelectionFromLocalStorage);
+  useCanvasEditorStore((state) => state.liveblocks.isStorageLoading);
+  usePresenceStore((state) => state.liveblocks.isStorageLoading);
+  usePresenceStore((state) => state.stageScale);
+  usePresenceStore((state) => state.stageViewBox);
+
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
-  const stageScale = usePresenceStore((state) => state.stageScale);
   const updateStageViewBox = usePresenceStore(
     (state) => state.updateStageViewBox
   );
   const selectedStageId = usePresenceStore((state) => state.selectedStageId);
-  const stageViewBox = usePresenceStore((state) => state.stageViewBox);
 
   const enterRoom = useCanvasEditorStore((state) => state.liveblocks.enterRoom);
   const leaveRoom = useCanvasEditorStore((state) => state.liveblocks.leaveRoom);
@@ -94,10 +94,6 @@ const Canvas = (props: Props) => {
     [updateCursorPosition]
   );
 
-  useEffect(() => {
-    getSelectionFromLocalStorage();
-  }
-  , [getSelectionFromLocalStorage, currentStage, isCanvasOnline, isPresenceOnline]);
 
   const throttledUpdateStagePosition = useCallback(
     throttle(
