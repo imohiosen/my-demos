@@ -336,20 +336,18 @@ const Canvas = (props: Props) => {
         >
           {/* Content layers */}
           {currentStage &&
-            currentStage.layers.map((layer) => (
+            [currentStage.layer].map((layer) => (
               <Layer key={layer.id} {...layer.attributes}>
                 {layer.groups.map((group) => {
                   return (
                     <Group key={group.id} {...group.attributes}>
-                      {group.components.map((shape) => {
-                        if (shape.type === "text") {
+                      {group.components.map((component) => {
+                        if (component.type === "text") {
                           return (
                               <Text
-                                key={shape.id}
-                                text={shape.text?.attribute.text || "No Text"}
-                                x={shape?.text?.attribute.x || 0}
-                                y={shape?.text?.attribute.y || 0}
-                                fontSize={72}
+                                key={component.id}
+                                {...component?.text?.attribute} 
+                                draggable
                               />
                           );
                         }

@@ -58,7 +58,10 @@ const AddText = (props: Props) => {
 								})
 							}
 						>
-							<p style={canvasTitleStyle}>Add Title</p>
+							<p style={{
+								fontSize: "36px",
+								fontWeight: "700",
+							}}>Add Title</p>
 						</X_Wrapper>
 						<X_Wrapper
 							onClick={() =>

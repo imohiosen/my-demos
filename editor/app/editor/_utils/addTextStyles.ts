@@ -1,22 +1,24 @@
-export const canvasTitleStyle = {
-  fontSize: '36px',
-  fontWeight: '800',
+import { DTextProps } from "./zustand/konva/store";
+
+export const canvasTitleStyle: DTextProps = {
+  fontSize: 96,
+  fontWeight: 70,
 };
 
-export const canvasTitle2Style = {
-  fontSize: '30px',
-  fontWeight: '700',
+export const canvasTitle2Style: DTextProps = {
+  fontSize: 30,
+  fontWeight: 700,
 };
 
-export const canvasSubtitleStyle = {
-  fontSize: '24px',
-  fontWeight: '600',
+export const canvasSubtitleStyle: DTextProps = {
+  fontSize: 24,
+  fontWeight: 600,
 };
-export const canvasBodyStyle = {
-  fontSize: '16px',
-  fontWeight: '400',
+export const canvasBodyStyle: DTextProps = {
+  fontSize: 16,
+  fontWeight: 400,
 };
-export const canvasCaptionStyle = {
-  fontSize: '12px',
-  fontWeight: '400',
+export const canvasCaptionStyle: DTextProps = {
+  fontSize: 12,
+  fontWeight: 400,
 };

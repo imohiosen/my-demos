@@ -1,4 +1,5 @@
 import { WithLiveblocks } from '@liveblocks/zustand';
+import { TextConfig } from 'konva/lib/shapes/Text';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Remove conflicting imports and fix type naming
@@ -15,21 +16,33 @@ export type DAvatar = {
     attribute: DAvatarProps
 }
 
-export type DTextProps = {
-    x: number; // X position of the text
-    y: number; // Y position of the text
-    text: string; // The text content
+// export type DTextProps = {
+//     x: number; // X position of the text
+//     y: number; // Y position of the text
+//     text: string; // The text content
+//     type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
+//     fill?: string; // Optional fill color for the text
+//     fontSize?: number; // Optional font size
+//     fontFamily?: string; // Optional font family
+//     fontStyle?: string; // Optional font style (e.g., 'bold', 'italic')
+//     align?: string; // Optional text alignment (e.g., 'left', 'center', 'right')
+
+//     stageId?: string; // Optional stage ID for context
+//     layerId?: string; // Optional layer ID for context
+//     groupId?: string; // Optional group ID for context
+//     componentId?: string; // Optional component ID for context
+// }
+
+export type DTextProps = TextConfig | {
+
+
     type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
-    fill?: string; // Optional fill color for the text
-    fontSize?: number; // Optional font size
-    fontFamily?: string; // Optional font family
-    fontStyle?: string; // Optional font style (e.g., 'bold', 'italic')
-    align?: string; // Optional text alignment (e.g., 'left', 'center', 'right')
 
     stageId?: string; // Optional stage ID for context
     layerId?: string; // Optional layer ID for context
     groupId?: string; // Optional group ID for context
     componentId?: string; // Optional component ID for context
+
 }
 
 export type DText = {
@@ -197,7 +210,7 @@ export type DStageProps = {
 export type DStage = { // Renamed from Stage to avoid conflict
     id: string;
     name?: string;
-    layers: DLayer[];
+    layer: DLayer; // change to single layer for simplicity
     audio?: DAudio; // Changed to array for multiple audio tracks
     hidden?: boolean;
     thumbnail?: string; // Base64 or URL
@@ -268,73 +281,8 @@ export interface CanvasDisplayParams {
 export interface VideoDraftActions {
     // Stage operations
     addStage: () => void;
-    duplicateStage: (stageId: string) => void;
-    updateStage: (stageId: string, updates: Partial<DStage>) => void;
-    removeStage: (stageId: string) => void;
-    reorderStages: (fromIndex: number, toIndex: number) => void;
 
-    // Layer operations
-    addLayer: (layer: Omit<DLayer, 'id' | 'metadata'>, stageId: string) => void;
-    updateLayer: (layerId: string, stageId: string, updates: Partial<DLayer>) => void;
-    removeLayer: (layerId: string, stageId: string) => void;
-    reorderLayers: (stageId: string, fromIndex: number, toIndex: number) => void;
 
-    // Group operations
-    addGroup: (group: Omit<DGroup, 'id' | 'metadata'>, layerId: string, stageId: string) => void;
-    updateGroup: (groupId: string, layerId: string, stageId: string, updates: Partial<DGroup>) => void;
-    removeGroup: (groupId: string, layerId: string, stageId: string) => void;
-    reorderGroups: (layerId: string, stageId: string, fromIndex: number, toIndex: number) => void;
-
-    // Component operations
-    addComponent: (component: Omit<DComponent, 'id' | 'metadata'>, groupId: string, layerId: string, stageId: string) => void;
-    updateComponent: (componentId: string, groupId: string, layerId: string, stageId: string, updates: Partial<DComponent>) => void;
-    removeComponent: (componentId: string, groupId: string, layerId: string, stageId: string) => void;
-    reorderComponents: (groupId: string, layerId: string, stageId: string, fromIndex: number, toIndex: number) => void;
-    
-    // Bulk operations
-    duplicateComponent: (componentId: string, groupId: string, layerId: string, stageId: string) => void;
-    groupComponents: (componentIds: string[], groupId: string, layerId: string, stageId: string) => void;
-    ungroupComponents: (groupId: string, layerId: string, stageId: string) => void;
-
-    // Audio operations
-    addAudio: (audio: DAudio, stageId: string) => void;
-    updateAudio: (audioId: string, stageId: string, updates: Partial<DAudio>) => void;
-    removeAudio: (audioId: string, stageId: string) => void;
-
-    // Selection operations
-    selectItem: (type: 'stage' | 'layer' | 'group' | 'component', id: string) => void;
-    clearSelection: () => void;
-    selectMultiple: (items: Array<{ type: string; id: string }>) => void;
-
-    // History operations
-    undo: () => void;
-    redo: () => void;
-    clearHistory: () => void;
-    createCheckpoint: (name?: string) => void;
-    saveToHistory: () => void; // Save current state to history
-
-    // Utility operations
-    exportDraft: () => string;
-    importDraft: (data: string) => void;
-    validateDraft: () => { isValid: boolean; errors: string[] };
-    optimizeDraft: () => void; // Remove unused elements, compress data
-    
-    // Template operations
-    saveAsTemplate: (name: string) => void;
-    loadTemplate: (templateId: string) => void;
-
-    selectedStage: () => DStage ;
-
-    updateComponentAttributes: (
-        componentId: string,
-        groupId: string,
-        layerId: string,
-        stageId: string,
-        type: "element" | "text" | "avatar" | "media" | "background" | "audio-caption",
-        attributes: Partial<DElementProps | DTextProps | DAvatarProps | DMediaProps | DBackgroundProps | DAudioCaptionProps>
-    ) => void;
-
-    updateClientLive: (updates: Partial<VideoDraftState['clientLive']>) => void;
     getStageById: (stageId: string) => DStage | undefined;
 
     addText: (
