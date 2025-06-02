@@ -53,8 +53,18 @@ const updateMetadata = (metadata?: {
 });
 
 const client = createClient({
-  publicApiKey:
-    "pk_dev_7NjVi0ycMqKpfqN6eyhfpDVAt7m8uktB2Q8n2tc8uOe7R0HX_2OBqOeK8BzgGvUr",
+  authEndpoint: async (roomId?) => {
+    const response = await fetch("/api/liveblocks", {
+      method: "POST",
+      headers: {
+         Authentication: "token",
+         "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ userId: "ab-01", roomId })
+    });
+
+    return await response.json(); // should be: { token: "..." }
+  }
 });
 
 export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
