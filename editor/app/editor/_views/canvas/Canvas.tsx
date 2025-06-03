@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import XGroup from "./components/XGroup";
 import XText from "./components/XText";
 import { stages } from "konva/lib/Stage";
+import XRect from "./components/XRect";
+import XCircle from "./components/XCircle";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -355,7 +357,8 @@ const Canvas = (props: Props) => {
                       {group.components.map((component) => {
                         if (component.type === "text") {
                           return (
-                              <XText
+                            <>
+                              {/* <XText
                                 key={component.id}
                                 {...component?.text?.attribute} 
                                 draggable={true}
@@ -366,7 +369,25 @@ const Canvas = (props: Props) => {
                                   stageId: currentStage.id,
                                   type: "component",
                                 }, e)}
-                              />
+                                /> */}
+                              <XRect 
+                                key={component.id}
+                                x={0}
+                                y={0}
+                                width={100}
+                                height={100}
+                                fill="red"
+                                draggable={true}  
+                                />
+                              <XCircle 
+                                key={component.id}
+                                x={0}
+                                y={0}
+                                radius={50}
+                                fill="blue"
+                                draggable={true}
+                                />
+                                </>
                           );
                         }
                       })}

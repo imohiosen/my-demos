@@ -84,10 +84,11 @@ const XText: React.FC<XTextProps> = ({
           <input
             ref={inputRef}
             type="text"
-            value={currentText}
+            value={"Add title"}
             onChange={(e) => setCurrentText(e.target.value)}
             onBlur={finishEditing}
             onKeyDown={handleKeyDown}
+            placeholder="Add title"
             style={{
                 scale: 2.5,
               margin: 0,
