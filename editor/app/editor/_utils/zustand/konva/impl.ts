@@ -163,6 +163,42 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               textComp.text.attribute = { ...e?.target?.attrs };
             });
           },
+          mergeCircleAttrs: (selection: Selection, attrs: Partial<DElementProps>) => {
+            set((state) => {
+              const component = getComponentBySelection(selection, state);
+
+              if (component.type !== "element") {
+                console.error("Selected component is not an element component:" , component.type);
+                return;
+              }
+
+              if (!component.element || !component.element.attribute) {
+                console.error("Element component does not have element attribute");
+                return;
+              }
+              if (!component) 
+                console.log("Component not found for selection", selection);
+
+              component.element.attribute = {
+                ...component.element.attribute,
+                ...attrs,
+              };
+            });
+          },
+          getComponentBoundingRect: (selection: Selection) => {   
+            const state = get();
+            const component = getComponentBySelection(selection, state);
+            if (!component) {
+              console.error("Component not found for selection", selection);
+              return null;
+            }
+
+            // Assuming the component has an attribute with x, y, width, height
+            const { x = 0, y = 0, width = 100, height = 100 } =
+              component.element?.attribute || {};
+
+            return { x, y, width, height };
+          },
         }),
         {
           client,

@@ -1,8 +1,10 @@
 import { NodeConfig } from "konva/lib/Node";
 import { RectConfig } from "konva/lib/shapes/Rect";
 import { useEffect, useRef, useState } from "react";
-import { Group, Rect } from "react-konva";
+import { Rect } from "react-konva";
 import Konva from "konva";
+import XOutline from "./XOutline";
+import XWrapper from "./XWrapper";
 
 type Props = RectConfig & NodeConfig;
 
@@ -45,7 +47,7 @@ const XRect = (props: Props) => {
   const { x = 0, y = 0, width = 100, height = 100, ...restProps } = props;
 
   return (
-    <Group 
+    <XWrapper 
       ref={groupRef}
       draggable
       onMouseOver={handleMouseOver}
@@ -65,21 +67,11 @@ const XRect = (props: Props) => {
       />
       
       {/* Outline rectangle - only show when hovering */}
-      {showOutline && (
-        <Rect
-          {...(() => {
-            const boundingRect = getBoundingRect();
-            return boundingRect;
-          })()}
-          fill="transparent"
-          stroke="rgba(0, 123, 255, 1)"
-          strokeWidth={2}
-          draggable={false}
-          listening={false}
-          perfectDrawEnabled={false}
+      <XOutline
+          boundingRect={getBoundingRect()}
+          shouldDisplay={showOutline}
         />
-      )}
-    </Group>
+    </XWrapper>
   );
 };
 

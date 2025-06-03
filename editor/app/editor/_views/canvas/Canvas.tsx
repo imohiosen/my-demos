@@ -16,6 +16,7 @@ import XText from "./components/XText";
 import { stages } from "konva/lib/Stage";
 import XRect from "./components/XRect";
 import XCircle from "./components/XCircle";
+import XSelection from "./components/XSelection";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -353,7 +354,7 @@ const Canvas = (props: Props) => {
               <Layer key={layer.id} {...layer.attributes}>
                 {layer.groups.map((group) => {
                   return (
-                    <XGroup key={group.id} {...group.attributes}>
+                    <XGroup key={group.id} {...group.attributes} draggable={true}>
                       {group.components.map((component) => {
                         if (component.type === "text") {
                           return (
@@ -377,15 +378,18 @@ const Canvas = (props: Props) => {
                                 width={100}
                                 height={100}
                                 fill="red"
-                                draggable={true}  
                                 />
                               <XCircle 
                                 key={component.id}
                                 x={0}
                                 y={0}
                                 radius={50}
-                                fill="blue"
-                                draggable={true}
+                                fill="green"
+                                stageId={currentStage.id}
+                                componentId={component.id}
+                                layerId={layer.id}
+                                groupId={group.id}
+                                type="component"
                                 />
                                 </>
                           );
@@ -414,6 +418,44 @@ const Canvas = (props: Props) => {
 
               <BgOverlay />
             </Group>
+
+          </Layer>
+
+          <Layer listening={false}>
+            <Group listening={false}>
+              {/* Main canvas background */}
+              {currentStage &&
+            [currentStage.layer].map((layer) => (
+              <>
+                {layer.groups.map((group) => {
+                  return (
+                    <>
+                      {group.components.map((component) => {
+                        if (component.type === "text") {
+                          return (
+                            <>
+                              {/* <XSelection 
+                              key={"selection/"+component.id}
+                              selection={{
+                                componentId: component.id,
+                                groupId: group.id,
+                                layerId: layer.id,
+                                stageId: currentStage.id,
+                                type: "component",
+                              }}
+                              shouldDisplay={true}
+                              /> */}
+                                </>
+                          );
+                        }
+                      })}
+                    </>
+                  );
+                })}
+              </>
+            ))}
+            </Group>
+            
           </Layer>
         </Stage>
       </div>

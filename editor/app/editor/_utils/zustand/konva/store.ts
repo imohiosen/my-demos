@@ -297,7 +297,8 @@ export interface VideoDraftActions {
     ) => void;
 
     handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;
-
+    mergeCircleAttrs: (selection: Selection, attrs: Partial<DElementProps>) => void;
+    getComponentBoundingRect: (selection: Selection) => { x: number; y: number; width: number; height: number; } | null;
 }
 
 // Helper function to generate unique IDs
