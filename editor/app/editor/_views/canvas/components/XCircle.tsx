@@ -5,7 +5,7 @@ import { Group, Circle } from "react-konva";
 import Konva from "konva";
 import XWrapper from "./XWrapper";
 import XOutline from "./XOutline";
-import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
+import { useCanvasEditorStore, usePresenceStore } from "@/app/editor/_utils/zustand/konva/impl";
 
 type Props = CircleConfig & NodeConfig;
 
@@ -18,7 +18,7 @@ const XCircle = (props: Props) => {
   useEffect(() => {
     // This effect runs once when the component mounts
     if (circleRef.current) {
-      console.log("Circle ref:", circleRef.current.attrs);
+      console.log("Circle ref 1:", circleRef.current.attrs);
     }
   }
   , []);
@@ -59,10 +59,12 @@ const XCircle = (props: Props) => {
 
   // Extract position and size props
   const { x = 0, y = 0, radius = 50, ...restProps } = props;
+  console.log("XCircle props:", props); 
 
   return (
     <XWrapper 
       ref={groupRef}
+      id={props.id}
       draggable
       onMouseOver={handleMouseOver}
       onMouseEnter={handleMouseOver}
@@ -74,10 +76,7 @@ const XCircle = (props: Props) => {
       {/* Main circle */}
       <Circle
         ref={circleRef}
-        x={x}
-        y={y}
-        radius={radius}
-        {...restProps}
+        {...props}
         draggable={false}
       />
       

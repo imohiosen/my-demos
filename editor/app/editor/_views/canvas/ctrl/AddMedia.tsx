@@ -1,4 +1,9 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import React from "react";
 
 type Props = {

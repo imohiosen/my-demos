@@ -1,11 +1,13 @@
 "use client";
-import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
+import { useCanvasEditorStore, usePresenceStore } from "@/app/editor/_utils/zustand/konva/impl";
+import { useStageRefState } from "@/app/editor/_utils/zustand/konva/store";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Konva from "konva";
 import React from "react";
 
 type Props = {
@@ -70,33 +72,38 @@ const AddElement = (props: Props) => {
 export default AddElement;
 
 import React from "react";
+import { Circle } from "react-konva";
 
 type Props = {};
 
 const CircleButton = () => {
   const addElement = useCanvasEditorStore(state => state.addElement);
   const getCurrentLayerSelection = useCanvasEditorStore(state => state.getCurrentLayerSelection);
+  const renderCanvas = usePresenceStore(state => state.renderCanvas);
+
 
   const handleAddElement = () => {
-    // alert("Adding element");
-    // addElement({
-    //   id: `element-circle-${Date.now()}`,
-    //   type: "element",
-    //   element: {
-    //     attribute: {
-    //       x: 0,
-    //       y: 0,
-    //     }
-    //   },
-    // }, getCurrentLayerSelection());
+    
+    addElement({
+      id: `element-circle-${Date.now()}`,
+      type: "element",
+      element: {
+        attribute: {
+          x: 0, 
+          y: 0,
+          radius: 50,
+          fill: "black",          
+          type: "circle",
+        }
+      },
+    }, getCurrentLayerSelection());
+    renderCanvas();
   };
 
   return (
     <button className="border-1 border-transparent hover:border-1 hover:border-primary bg-primary/10 rounded-xl flex items-center justify-center p-2 m-2"
 
-      onClick={() => {
-        alert("Adding element");
-      }}  
+      onClick={handleAddElement}  
     >  
       <div className="w-24 h-24 bg-primary rounded-full"></div>
     </button>

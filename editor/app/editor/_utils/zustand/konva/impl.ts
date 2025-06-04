@@ -29,6 +29,7 @@ import { title } from "process";
 import { canvasTitleStyle } from "../../addTextStyles";
 import { text } from "stream/consumers";
 import Konva from "konva";
+import { Layer } from "react-konva";
 
 type State = VideoDraftState;
 type Actions = VideoDraftActions;
@@ -57,14 +58,14 @@ const client = createClient({
     const response = await fetch("/api/liveblocks", {
       method: "POST",
       headers: {
-         Authentication: "token",
-         "Content-Type": "application/json"
+        Authentication: "token",
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId: "ab-01", roomId })
+      body: JSON.stringify({ userId: "ab-01", roomId }),
     });
 
     return await response.json(); // should be: { token: "..." }
-  }
+  },
 });
 
 export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
@@ -163,20 +164,28 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               textComp.text.attribute = { ...e?.target?.attrs };
             });
           },
-          mergeCircleAttrs: (selection: Selection, attrs: Partial<DElementProps>) => {
+          mergeCircleAttrs: (
+            selection: Selection,
+            attrs: Partial<DElementProps>
+          ) => {
             set((state) => {
               const component = getComponentBySelection(selection, state);
 
               if (component.type !== "element") {
-                console.error("Selected component is not an element component:" , component.type);
+                console.error(
+                  "Selected component is not an element component:",
+                  component.type
+                );
                 return;
               }
 
               if (!component.element || !component.element.attribute) {
-                console.error("Element component does not have element attribute");
+                console.error(
+                  "Element component does not have element attribute"
+                );
                 return;
               }
-              if (!component) 
+              if (!component)
                 console.log("Component not found for selection", selection);
 
               component.element.attribute = {
@@ -185,7 +194,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               };
             });
           },
-          getComponentBoundingRect: (selection: Selection) => {   
+          getComponentBoundingRect: (selection: Selection) => {
             const state = get();
             const component = getComponentBySelection(selection, state);
             if (!component) {
@@ -194,10 +203,104 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             }
 
             // Assuming the component has an attribute with x, y, width, height
-            const { x = 0, y = 0, width = 100, height = 100 } =
-              component.element?.attribute || {};
+            const {
+              x = 0,
+              y = 0,
+              width = 100,
+              height = 100,
+            } = component.element?.attribute || {};
 
             return { x, y, width, height };
+          },
+
+          addElement: (component: DComponent, selection: Selection) => {
+            set((state: State) => {
+              const { layerId, stageId } = selection;
+              if (!stageId)
+                return console.error(
+                  `Stage ID is missing in selection: ${selection}`
+                );
+              if (!layerId)
+                return console.error(
+                  `Layer ID is missing in selection: ${selection}`
+                );
+
+              const stage = state.current.stages.find((s) => s.id === stageId);
+              if (!stage)
+                return console.error(`Stage with id ${stageId} not found`);
+
+              const layer = stage.layer;
+              if (!layer)
+                return console.error(
+                  `Layer with id ${layerId} not found in stage ${stageId}`
+                );
+
+              layer.groups.push({
+                id: generateId(),
+                components: [component],
+                attributes: {} as DGroupProps, // Initialize with empty attributes
+              });
+              console.log(
+                `Added component to layer ${layerId} in stage ${stageId}`, component
+              );
+            });
+          },
+          removeElement: (selection: Selection) => {
+            set((state: State) => {
+              const { componentId, groupId, layerId, stageId } = selection;
+              if (!componentId || !groupId || !layerId || !stageId)
+                return console.error("Selection is incomplete:", selection);
+
+              const stage = state.current.stages.find((s) => s.id === stageId);
+              if (!stage)
+                return console.error(`Stage with id ${stageId} not found`);
+
+              const layer = stage.layer;
+              if (!layer)
+                return console.error(
+                  `Layer with id ${layerId} not found in stage ${stageId}`
+                );
+
+              const group = layer.groups.find((g) => g.id === groupId);
+              if (!group)
+                return console.error(
+                  `Group with id ${groupId} not found in layer ${layerId}, stage ${stageId}`
+                );
+
+              group.components = group.components.filter(
+                (c) => c.id !== componentId
+              );
+            });
+          },
+
+          getCurrentLayerSelection: (): Selection => {
+            const state = get();
+            const selectedStageId = usePresenceStore.getState().selectedStageId;
+            if (!selectedStageId) throw new Error(`Stage ID is not selected`);
+            const stage = state.current.stages.find(
+              (s: DStage) => s.id === selectedStageId
+            );
+            if (!stage)
+              throw new Error(`Stage with id ${selectedStageId} not found`);
+            const layer = stage.layer; // Assuming we want the first layer
+            if (!layer)
+              throw new Error(`Layer not found in stage ${selectedStageId}`);
+            return {
+              layerId: layer.id,
+              stageId: stage.id,
+              type: "layer",
+            };
+          },
+          getCurrentLayer: (): DLayer | undefined => {
+            const state = get();
+            const selectedStageId = usePresenceStore.getState().selectedStageId;
+            if (!selectedStageId) throw new Error(`Stage ID is not selected`);
+            const stage = state.current.stages.find(
+              (s: DStage) => s.id === selectedStageId
+            );
+            if (!stage)
+              throw new Error(`Stage with id ${selectedStageId} not found`);
+            return stage.layer; // Assuming we want the first layer
           },
         }),
         {
@@ -217,6 +320,7 @@ const init = (set, get) => ({
   stagePosition: { x: 0, y: 0 },
   stageScale: { x: 1, y: 1 },
   stageViewBox: { x: 0, y: 0 },
+  renderCount: 0,
   updateCursorPosition: (position: Point) => {
     set((state) => {
       state.cursorPosition = position;
@@ -249,31 +353,14 @@ const init = (set, get) => ({
     // get().saveSelectionToLocalStorage(); // Save to localStorage
     // console.log("Selected stage ID updated:", stageId);
   },
-  saveSelectionToLocalStorage: () => {
-    const id = get().selectedStageId;
-    const roomKey = get().liveblocks.room?.id as string;
-
-    if (!id) {
-      console.warn("No selected stage ID found");
-      return;
-    }
-    const selectionString = JSON.stringify(id);
-    localStorage.setItem(roomKey, selectionString);
-  },
-  getSelectionFromLocalStorage: () => {
-    const roomKey = get().liveblocks.room?.id as string;
-    console.log("Retrieving selection from localStorage");
-    const selectionString = localStorage.getItem(roomKey);
-    if (!selectionString) return null;
-
-    try {
-      get().updateSelectedStageId(JSON.parse(selectionString) as string);
-      return JSON.parse(selectionString) as string;
-    } catch (error) {
-      console.error("Failed to parse selection from localStorage", error);
-      return null;
-    }
-  },
+  renderCanvas: () => {
+    // This function can be used to trigger a re-render of the canvas
+    // For example, you can call it after updating the state to ensure the canvas reflects the latest changes
+    set((state) => {
+      state.renderCount += 1; // Increment render count to trigger re-render
+    });
+  }
+  // Add more actions as needed
 });
 
 export const usePresenceStore = create<WithLiveblocks<Presence>>()(

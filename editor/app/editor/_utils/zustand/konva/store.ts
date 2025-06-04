@@ -2,6 +2,7 @@ import { WithLiveblocks } from '@liveblocks/zustand';
 import Konva from 'konva';
 import { NodeConfig } from 'konva/lib/Node';
 import { TextConfig } from 'konva/lib/shapes/Text';
+import { create } from 'zustand';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Remove conflicting imports and fix type naming
@@ -78,7 +79,7 @@ export type DElementProps = {
   fontFamily?: string; // Font family for text elements
   fontStyle?: string; // Font style for text elements
   align?: string; // Text alignment for text elements 
-  type?: "rectangle" | "circle" | "line" | "arrow"; // Subtype for more specific element types    
+  type: "rectangle" | "circle" | "line" | "arrow"; // Subtype for more specific element types    
 
   stageId?: string; // Optional stage ID for context
   layerId?: string; // Optional layer ID for context
@@ -242,6 +243,21 @@ export type VideoDraftState = {
     };
 }
 
+export type stageRefState = {
+    stageRef: Konva.Stage | null; // Reference to the Konva stage
+    contentLayerRef: Konva.Layer | null; // Reference to the content layer of the stage
+    setStageRef: (ref: Konva.Stage | null) => void; // Function to set the stage reference
+    setContentLayerRef: (ref: Konva.Layer | null) => void; // Function to set the content layer reference
+}
+
+export const useStageRefState = create<stageRefState>()((set) => ({
+    stageRef: null, // Initial state of the stage reference
+    contentLayerRef: null, // Initial state of the content layer reference
+    setStageRef: (ref: Konva.Stage | null) => set({ stageRef: ref }), // Function to update the stage reference
+    setContentLayerRef: (ref: Konva.Layer | null) => set({ contentLayerRef: ref }) // Function to update the content layer reference
+}));
+
+
 export type Presence = {
     cursorPosition: Point; // Current cursor position
     selectedItems?: Selection[]; // Array of selected items
@@ -249,6 +265,7 @@ export type Presence = {
     stageViewBox?: Point; // Height of the stage
     stageScale?: Point; // Scale of the stage
     selectedStageId?: string; // ID of the selected group
+    renderCount: number; // Count of renders for the current presence
     updateCursorPosition: (position: Point) => void; // Update cursor position
     updateSelectedItems: (items: Selection[]) => void; // Update selected items
     updateStagePosition: (position: Point) => void; // Update stage position
@@ -256,8 +273,7 @@ export type Presence = {
     updateStageScale: (scale: Point) => void; // Update stage scale
     updateSelectedStageId: (stageId: string) => void; // Update selected group ID
 
-    saveSelectionToLocalStorage: () => void;
-    getSelectionFromLocalStorage: () => string | null;
+    renderCanvas: () => void; // Function to trigger a re-render of the canvas
 
 }
 
@@ -299,6 +315,10 @@ export interface VideoDraftActions {
     handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;
     mergeCircleAttrs: (selection: Selection, attrs: Partial<DElementProps>) => void;
     getComponentBoundingRect: (selection: Selection) => { x: number; y: number; width: number; height: number; } | null;
+    addElement: ( comp: DComponent, sel: Selection) => void;       
+    removeElement: (sel: Selection) => void;
+    getCurrentLayer: () => DLayer | undefined;
+    getCurrentLayerSelection: () => Selection;
 }
 
 // Helper function to generate unique IDs

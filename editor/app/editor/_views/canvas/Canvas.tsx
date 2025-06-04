@@ -7,7 +7,7 @@ import {
   useCanvasEditorStore,
   usePresenceStore,
 } from "../../_utils/zustand/konva/impl";
-import { VideoDraftState } from "../../_utils/zustand/konva/store";
+import { DLayer, DStage, useStageRefState, VideoDraftState } from "../../_utils/zustand/konva/store";
 import throttle from "lodash/throttle";
 import { LucideDownload, LucideTarget, UndoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import { stages } from "konva/lib/Stage";
 import XRect from "./components/XRect";
 import XCircle from "./components/XCircle";
 import XSelection from "./components/XSelection";
+import XElement from "./components/XElement";
+import XLayer from "./components/XLayer";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -54,8 +56,14 @@ function getFittingViewport(viewport: { width: number; height: number }) {
 const THROTTLE_DELAY = 200; // Adjust as needed for performance
 
 const Canvas = (props: Props) => {
+
+  usePresenceStore((state) => state.renderCount);
+
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
+
+
 
   const enterPresenceRoom = usePresenceStore(
     (state) => state.liveblocks.enterRoom
@@ -86,7 +94,11 @@ const Canvas = (props: Props) => {
   const getStageById = useCanvasEditorStore((state) => state.getStageById);
   const currentStage = getStageById(selectedStageId!);
 
-  const handleTextDragEnd = useCanvasEditorStore((state) => state.handleTextDragEnd);
+  
+
+  const handleTextDragEnd = useCanvasEditorStore(
+    (state) => state.handleTextDragEnd
+  );
 
   // Create throttled functions once, not on every call
   const throttledUpdateCursorPosition = useCallback(
@@ -96,7 +108,6 @@ const Canvas = (props: Props) => {
     ),
     [updateCursorPosition]
   );
-
 
   const throttledUpdateStagePosition = useCallback(
     throttle(
@@ -351,54 +362,11 @@ const Canvas = (props: Props) => {
           {/* Content layers */}
           {currentStage &&
             [currentStage.layer].map((layer) => (
-              <Layer key={layer.id} {...layer.attributes}>
-                {layer.groups.map((group) => {
-                  return (
-                    <XGroup key={group.id} {...group.attributes} draggable={true}>
-                      {group.components.map((component) => {
-                        if (component.type === "text") {
-                          return (
-                            <>
-                              {/* <XText
-                                key={component.id}
-                                {...component?.text?.attribute} 
-                                draggable={true}
-                                onDragEnd={(e: Konva.KonvaEventObject<DragEvent>) => handleTextDragEnd({
-                                  componentId: component.id,
-                                  groupId: group.id,
-                                  layerId: layer.id,
-                                  stageId: currentStage.id,
-                                  type: "component",
-                                }, e)}
-                                /> */}
-                              <XRect 
-                                key={component.id}
-                                x={0}
-                                y={0}
-                                width={100}
-                                height={100}
-                                fill="red"
-                                />
-                              <XCircle 
-                                key={component.id}
-                                x={0}
-                                y={0}
-                                radius={50}
-                                fill="green"
-                                stageId={currentStage.id}
-                                componentId={component.id}
-                                layerId={layer.id}
-                                groupId={group.id}
-                                type="component"
-                                />
-                                </>
-                          );
-                        }
-                      })}
-                    </XGroup>
-                  );
-                })}
-              </Layer>
+              <XLayer
+                key={layer.id}
+                layer={layer}
+                currentStage={currentStage}
+              />
             ))}
 
           {/* Background and overlay layer */}
@@ -418,45 +386,37 @@ const Canvas = (props: Props) => {
 
               <BgOverlay />
             </Group>
-
           </Layer>
 
-          <Layer listening={false}>
-            <Group listening={false}>
               {/* Main canvas background */}
               {currentStage &&
-            [currentStage.layer].map((layer) => (
-              <>
-                {layer.groups.map((group) => {
-                  return (
-                    <>
-                      {group.components.map((component) => {
-                        if (component.type === "text") {
-                          return (
-                            <>
-                              {/* <XSelection 
-                              key={"selection/"+component.id}
-                              selection={{
-                                componentId: component.id,
-                                groupId: group.id,
-                                layerId: layer.id,
-                                stageId: currentStage.id,
-                                type: "component",
-                              }}
-                              shouldDisplay={true}
-                              /> */}
-                                </>
-                          );
-                        }
-                      })}
-                    </>
-                  );
-                })}
-              </>
-            ))}
-            </Group>
-            
+                [currentStage.layer].map((layer) => (
+                  <Layer listening={false} key={layer.id} id={layer.id}>
+                    {layer.groups.map((group) => {
+                      return (
+                        <Group listening={false} key={group.id} id={group.id}>
+                          {group.components.map((component) => {
+                            if (component.type === "text") {
+                              return (
+                                <XSelection 
+                                key={component.id}
+                                selection={{
+                                  componentId: component.id,
+                                  groupId: group.id,
+                                  layerId: layer.id,
+                                  stageId: currentStage.id,
+                                  type: "component",
+                                }}
+                                shouldDisplay={true}
+                                /> 
+                              );
+                            }
+                          })}
+                          </Group>
+                      );
+                    })}
           </Layer>
+                ))}
         </Stage>
       </div>
 
