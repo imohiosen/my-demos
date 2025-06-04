@@ -17,11 +17,6 @@ const XLayer = (props: Props) => {
 
     
 
-    useEffect(() => {
-      // This effect runs when the layer or currentStage changes
-      console.log("XLayer updated:", layer.id, "Stage:", currentStage.id);
-    }, [layer.groups.length]);
-    console.log(layer.groups.length)
 
   return (
     <Layer key={layer.id} {...layer.attributes}>
@@ -35,6 +30,7 @@ const XLayer = (props: Props) => {
                   <XElement
                     key={component.id}
                     {...component.element.attribute}
+                    componentId={component.id}
                     groupId={group.id}
                     layerId={layer.id}
                     stageId={currentStage.id}

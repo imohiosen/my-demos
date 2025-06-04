@@ -12,18 +12,16 @@ type Props = CircleConfig & NodeConfig;
 const XCircle = (props: Props) => {
   const groupRef = useRef<Konva.Group>(null);
   const circleRef = useRef<Konva.Circle>(null);
-  const [showOutline, setShowOutline] = useState(false);
   const mergeCircleAttrs = useCanvasEditorStore(state => state.mergeCircleAttrs);
+  
+  const [showOutline, setShowOutline] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {
-    // This effect runs once when the component mounts
-    if (circleRef.current) {
-      console.log("Circle ref 1:", circleRef.current.attrs);
-    }
-  }
-  , []);
 
   const handleCircleDragMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    setIsDragging(true);
+  };
+  const handleCircleDragEnd = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (circleRef.current) {
       mergeCircleAttrs({
         stageId: props.stageId,
@@ -32,20 +30,16 @@ const XCircle = (props: Props) => {
         layerId: props.layerId,
         groupId: props.groupId,
       }, {
-        ...getBoundingRect()
+        ...e.target.attrs,
       });
     }
-  };
-  const handleCircleDragEnd = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (circleRef.current) {
-      
-    }
+    setIsDragging(false);
   };
   const handleMouseOver = (e: Konva.KonvaEventObject<MouseEvent>) => setShowOutline(true);
   const handleMouseOut = (e: Konva.KonvaEventObject<MouseEvent>) => setShowOutline(false);
 
   // Get the bounding rect of the rendered circle
-  const getBoundingRect = useCallback(() => {
+  const getBoundingRect = () => {
     if (circleRef.current) {
       return { 
         x: circleRef.current.attrs.x - circleRef.current.attrs.radius, 
@@ -55,37 +49,31 @@ const XCircle = (props: Props) => {
       };
     }
     return { x: 0, y: 0, width: 0, height: 0 };
-  }, [circleRef]);
+  };
 
   // Extract position and size props
-  const { x = 0, y = 0, radius = 50, ...restProps } = props;
-  console.log("XCircle props:", props); 
 
   return (
-    <XWrapper 
-      ref={groupRef}
-      id={props.id}
-      draggable
-      onMouseOver={handleMouseOver}
-      onMouseEnter={handleMouseOver}
-      onMouseOut={handleMouseOut}
-      onMouseLeave={handleMouseOut}
-      onDragMove={handleCircleDragMove}
-      onDragEnd={handleCircleDragEnd}
-    >
+    <> 
       {/* Main circle */}
       <Circle
         ref={circleRef}
         {...props}
-        draggable={false}
+        draggable
+        onMouseOver={handleMouseOver}
+        onMouseEnter={handleMouseOver}
+        onMouseOut={handleMouseOut}
+        onMouseLeave={handleMouseOut}
+        onDragMove={handleCircleDragMove}
+        onDragEnd={handleCircleDragEnd}
       />
       
       {/* Outline rectangle - only show when hovering */}
       <XOutline 
         boundingRect={getBoundingRect()}
-        shouldDisplay={showOutline}
+        shouldDisplay={showOutline && !isDragging}
       />
-    </XWrapper>
+    </>
   );
 };
 
