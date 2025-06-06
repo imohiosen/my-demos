@@ -386,7 +386,7 @@ const Canvas = (props: Props) => {
               <BgOverlay />
             </Group>
           </Layer>
-            <Layer listening={false}>
+            <Layer >
             {currentStage && (
               currentStage.map((component) => (
                 component.type === "element" &&
