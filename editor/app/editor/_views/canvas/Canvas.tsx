@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";;
+"use client";
 import { useCallback, useEffect, useRef } from "react";
 import { Group, Layer, Rect, Stage } from "react-konva";
 import Konva from "konva";
@@ -12,6 +12,7 @@ import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import XGroup from "./components/XGroup";
 import XElement from "./components/XElement";
+import CanvasBackground from "./components/CanvasBackground";
 import { DGroup } from "../../_utils/zustand/konva/types";
 
 // Constants
@@ -25,39 +26,13 @@ const OVERLAY_MULTIPLIER = 5;
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
 
-// Utility function
-function getFittingViewport(viewport: { width: number; height: number }) {
-  const aspectRatio = 16 / 9;
-  const maxWidth = viewport.width;
-  const maxHeight = viewport.height;
-
-  const widthBasedHeight = maxWidth / aspectRatio;
-  const heightBasedWidth = maxHeight * aspectRatio;
-
-  if (widthBasedHeight <= maxHeight) {
-    return {
-      width: maxWidth,
-      height: widthBasedHeight,
-    };
-  } else {
-    return {
-      width: heightBasedWidth * MAX_ZOOM_RATIO,
-      height: maxHeight * MAX_ZOOM_RATIO,
-    };
-  }
-}
-
 const THROTTLE_DELAY = 200; // Adjust as needed for performance
 
 const Canvas = (props: Props) => {
-
   usePresenceStore((state) => state.renderCount);
 
-  
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-
-
 
   const enterPresenceRoom = usePresenceStore(
     (state) => state.liveblocks.enterRoom
@@ -77,27 +52,18 @@ const Canvas = (props: Props) => {
   usePresenceStore((state) => state.stageScale);
   usePresenceStore((state) => state.stageViewBox);
 
-
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
   const updateStageViewBox = usePresenceStore(
     (state) => state.updateStageViewBox
   );
   const selectedSceneId = usePresenceStore((state) => state.selectedStageId);
 
-  
-
   const enterRoom = useCanvasEditorStore((state) => state.liveblocks.enterRoom);
   const leaveRoom = useCanvasEditorStore((state) => state.liveblocks.leaveRoom);
   const getSceneById = useCanvasEditorStore((state) => state.getSceneById);
-  const currentStage = getSceneById(selectedSceneId!);
+  const selectedScene = getSceneById(selectedSceneId!);
 
-  console.log("Current stage:", currentStage);
-
-  
-
-  const handleTextDragEnd = useCanvasEditorStore(
-    (state) => state.handleTextDragEnd
-  );
+  console.log("Current stage:", selectedScene);
 
   // Create throttled functions once, not on every call
   const throttledUpdateCursorPosition = useCallback(
@@ -131,6 +97,7 @@ const Canvas = (props: Props) => {
     ),
     [updateStageViewBox]
   );
+
   const draftId = useCanvasEditorStore((state) => state.id);
 
   useEffect(() => {
@@ -272,50 +239,6 @@ const Canvas = (props: Props) => {
     );
   };
 
-  const BgOverlay = () => (
-    <>
-      {/* Top overlay */}
-      <Rect
-        x={-CANVAS_WIDTH * OVERLAY_MULTIPLIER}
-        y={-CANVAS_HEIGHT * OVERLAY_MULTIPLIER}
-        width={CANVAS_WIDTH * OVERLAY_MULTIPLIER * 2}
-        height={CANVAS_HEIGHT * OVERLAY_MULTIPLIER - CANVAS_HEIGHT / 2}
-        fill="rgba(196, 196, 196, 0.1)"
-        listening={false}
-      />
-
-      {/* Bottom overlay */}
-      <Rect
-        x={-CANVAS_WIDTH * OVERLAY_MULTIPLIER}
-        y={CANVAS_HEIGHT / 2}
-        width={CANVAS_WIDTH * OVERLAY_MULTIPLIER * 2}
-        height={CANVAS_HEIGHT * OVERLAY_MULTIPLIER}
-        fill="rgba(196, 196, 196, 0.1)"
-        listening={false}
-      />
-
-      {/* Left overlay */}
-      <Rect
-        x={-CANVAS_WIDTH * OVERLAY_MULTIPLIER}
-        y={-CANVAS_HEIGHT / 2}
-        width={CANVAS_WIDTH * OVERLAY_MULTIPLIER - CANVAS_WIDTH / 2}
-        height={CANVAS_HEIGHT}
-        fill="rgba(196, 196, 196, 0.1)"
-        listening={false}
-      />
-
-      {/* Right overlay */}
-      <Rect
-        x={CANVAS_WIDTH / 2}
-        y={-CANVAS_HEIGHT / 2}
-        width={CANVAS_WIDTH * OVERLAY_MULTIPLIER}
-        height={CANVAS_HEIGHT}
-        fill="rgba(196, 196, 196, 0.1)"
-        listening={false}
-      />
-    </>
-  );
-
   if (!containerRef.current) {
     return (
       <div className="h-full w-full p-8 relative">
@@ -326,7 +249,7 @@ const Canvas = (props: Props) => {
       </div>
     );
   }
-  if (!currentStage) {
+  if (!selectedScene) {
     return (
       <div className="h-full w-full p-8 relative">
         <div
@@ -358,68 +281,37 @@ const Canvas = (props: Props) => {
           onDragMove={handleDrag}
           onMouseMove={handleMouseMove}
         >
-          {/* Content layers */}
-          {/* {currentStage &&
-            [currentStage.layer].map((layer) => (
-              <XLayer
-                key={layer.id}
-                layer={layer}
-                currentStage={currentStage}
-              />
-            ))} */}
-
           {/* Background and overlay layer */}
           <Layer listening={false}>
-            <Group listening={false}>
-              {/* Main canvas background */}
-              <Rect
-                x={0}
-                y={0}
-                width={CANVAS_WIDTH}
-                height={CANVAS_HEIGHT}
-                fill="transparent"
-                stroke="transparent"
-                offsetX={CANVAS_WIDTH / 2}
-                offsetY={CANVAS_HEIGHT / 2}
-              />
-
-              <BgOverlay />
-            </Group>
+            <CanvasBackground />
           </Layer>
-            <Layer >
-            {currentStage && (
-              currentStage.map((component) => (
-                component.type === "element" &&
-                component.element && (
-                  <XElement
-                    key={component.id}
-                    {...component.element.attribute}
-                    componentId={component.id}
-                    stageId={selectedSceneId}
-                  />
-                )
-              ))
-            )}
-
-
-              {/* <XGroup key={group.id} {...group.attributes} draggable={true}>
-            {group.components.map((component) => {
-              return (
-                component.type === "element" &&
-                component.element && (
-                  <XElement
-                    key={component.id}
-                    {...component.element.attribute}
-                    componentId={component.id}
-                    groupId={group.id}
-                    layerId={layer.id}
-                    stageId={currentStage.id}
-                  />
-                )
-              );
-            })}
-          </XGroup> */}
-              </Layer >
+          <Layer>
+            {selectedScene &&
+              selectedScene.map((component) => {
+                if (component.type === "group") {
+                  console.log("Group not implemented:");
+                  return (
+                    null
+                  );
+                } else if (component.type === "element") {
+                  return (
+                    component.element && (
+                      <XElement
+                        key={component.id}
+                        {...component.element.attribute}
+                        componentId={component.id}
+                        sceneId={selectedSceneId}
+                      />
+                    )
+                  );
+                } else if (component.type === "text") {
+                  console.error(
+                    "Text components are not yet implemented in Canvas")
+                  return null;
+                }
+                return null;
+              })}
+          </Layer>
         </Stage>
       </div>
 

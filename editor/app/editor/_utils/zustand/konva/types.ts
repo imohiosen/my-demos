@@ -76,7 +76,7 @@ export type DElementProps = {
   align?: string; // Text alignment for text elements 
   type?: "rectangle" | "circle" | "line" | "arrow"; // Subtype for more specific element types    
 
-  stageId?: string; // Optional stage ID for context
+  sceneId?: string; // Optional stage ID for context
   layerId?: string; // Optional layer ID for context
   groupId?: string; // Optional group ID for context
   componentId?: string; // Optional component ID for context
