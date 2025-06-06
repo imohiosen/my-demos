@@ -22,6 +22,9 @@ const CANVAS_HEIGHT = 1080;
 const ZOOM_SCALE_FACTOR = 1.1;
 const OVERLAY_MULTIPLIER = 5;
 
+// TODO
+// Group Items
+// thumbnails
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
