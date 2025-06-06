@@ -319,27 +319,16 @@ export const usePresenceStore = create<WithLiveblocks<Presence>>()(
     }
   )
 );
-
+type ImmerState = WritableDraft<WithLiveblocks<VideoDraftState & VideoDraftActions>>;
 function getComponentFromSelectedScene(
   selection: Selection,
-  state: WritableDraft<WithLiveblocks<VideoDraftState & VideoDraftActions>>
+  state: ImmerState
 ) {
   const selectedScene = usePresenceStore.getState().selectedStageId;
-  if (!selectedScene) throw new Error(`Stage ID is not selected`);
-  let comp;
-  if (selection.groupId) {
-    const group = state.current.scenes[selectedScene].find(
-      (g) => g.id === selection.groupId
-    ) as DGroup;
-    comp = group?.components.find(
-      (c) => c.id === selection.componentId
-    ) as DComponent;
-  } else if (selection.componentId) {
-    comp = state.current.scenes[selectedScene].find(
-      (c) => c.id === selection.componentId
-    ) as DComponent;
-  }
-
+  if (!selectedScene) throw new Error(`No scene selected`);
+  const comp = state.current.scenes[selectedScene].find(
+    (c) => c.id === selection.componentId
+  ) as DComponent;
   if (!comp) {
     throw new Error(
       `Component with id ${selection.componentId} not found in scene ${selectedScene}`
