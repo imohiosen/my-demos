@@ -25,6 +25,8 @@ const OVERLAY_MULTIPLIER = 5;
 // TODO
 // Group Items
 // thumbnails
+// delete selected items
+// undo/redo
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
