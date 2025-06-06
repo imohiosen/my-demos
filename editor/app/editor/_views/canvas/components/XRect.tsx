@@ -16,17 +16,14 @@ const XRect = (props: Props) => {
   useEffect(() => {
     // This effect runs once when the component mounts
     if (rectRef.current) {
-      console.log("Rect ref:", rectRef.current.attrs);
     }
   }, []);
 
   const handleMouseOver = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    console.log("Mouse over rect", e);
     setShowOutline(true);
   };
 
   const handleMouseOut = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    console.log("Mouse out rect", e);
     setShowOutline(false);
   };
 

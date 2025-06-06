@@ -19,11 +19,9 @@ const PlaybackScene = ({
   // const updateSelectedStageId = usePresenceStore((state) => state.updateSelectedStageId);
   
   const isSelected = selectedStageId === sceneId;
-  console.log("PlaybackScene rendered with sceneId:", sceneId, "isSelected:", selectedStageId);
 
   const handleClick = useCallback(() => {
     updateSelectedStageId(sceneId);
-    console.log("Selected scene ID:", sceneId, selectedStageId);
   }, [sceneId, updateSelectedStageId]);
 
   return (

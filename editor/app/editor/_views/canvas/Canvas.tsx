@@ -1,21 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+"use client";;
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Group, Layer, Rect, Stage } from "react-konva";
+import { Layer, Rect, Stage } from "react-konva";
 import Konva from "konva";
 import {
   useCanvasEditorStore,
   usePresenceStore,
 } from "../../_utils/zustand/konva/impl";
 import throttle from "lodash/throttle";
-import { LucideDownload, LucideTarget, X } from "lucide-react";
+import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import XGroup from "./components/XGroup";
 import XElement from "./components/XElement";
 import CanvasBackground from "./components/CanvasBackground";
-import { DGroup } from "../../_utils/zustand/konva/types";
 import XSelect from "./components/XSelect";
-import { KonvaNodeEvent } from "konva/lib/types";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -24,6 +21,11 @@ const CANVAS_WIDTH = 1920;
 const CANVAS_HEIGHT = 1080;
 const ZOOM_SCALE_FACTOR = 1.1;
 const OVERLAY_MULTIPLIER = 5;
+
+// TODO
+// Select single and multiple by click
+// Deselect when clicking outside
+// reset transform
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
@@ -369,10 +371,6 @@ const Canvas = (props: Props) => {
 
     setSelectedIds(selected.map((rect) => rect.id));
 
-    console.log(
-      "Selected components:",
-      selected.map((rect) => rect.id)
-    );
 
     // Update visibility in timeout, so we can check it in click event
     setTimeout(() => {
@@ -443,7 +441,7 @@ const Canvas = (props: Props) => {
             {selectedScene &&
               selectedScene.map((component) => {
                 if (component.type === "group") {
-                  console.log("Group not implemented:");
+                  console.error("Group not implemented:");
                   return null;
                 } else if (component.type === "element") {
                   return (

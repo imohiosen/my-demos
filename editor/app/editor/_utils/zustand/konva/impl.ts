@@ -166,7 +166,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
                 ...component.element.attribute,
                 ...attrs,
               };
-              console.log(attrs);
+              
             });
           },
           getComponentBoundingRect: (selection: Selection) => {

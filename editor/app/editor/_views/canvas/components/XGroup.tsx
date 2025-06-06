@@ -10,7 +10,6 @@ const XGroup = (props: Props) => {
     // You can add any initialization logic here if needed
     if (ref.current) {
       // Example: Log the ref to see if it's correctly assigned
-      console.log('Group ref:', ref.current)
     }
 
   }, [ref])

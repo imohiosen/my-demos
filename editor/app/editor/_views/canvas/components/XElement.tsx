@@ -10,7 +10,7 @@ const XElement = (props: Props) => {
   return (
     props.type === "circle" && <XCircle  {...props} /> ||
     props.type === "rectangle" && <XRect {...props} /> ||
-    (console.log("Unknown type:  "+ props.type), <Rect width={100} height={100} fill="purple" />)
+    (console.error("Unknown type:  "+ props.type), <Rect width={100} height={100} fill="purple" />)
   );
 };
 
