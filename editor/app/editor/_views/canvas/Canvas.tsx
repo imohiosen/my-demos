@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Group, Layer, Rect, Stage } from "react-konva";
 import Konva from "konva";
 import {
@@ -14,6 +14,8 @@ import XGroup from "./components/XGroup";
 import XElement from "./components/XElement";
 import CanvasBackground from "./components/CanvasBackground";
 import { DGroup } from "../../_utils/zustand/konva/types";
+import XSelect from "./components/XSelect";
+import { KonvaNodeEvent } from "konva/lib/types";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -29,7 +31,14 @@ type Props = {};
 const THROTTLE_DELAY = 200; // Adjust as needed for performance
 
 const Canvas = (props: Props) => {
-  usePresenceStore((state) => state.renderCount);
+
+    const [selectionRectangle, setSelectionRectangle] = useState({
+      visible: false,
+      x1: 0,
+      y1: 0,
+      x2: 0,
+      y2: 0,
+    });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
@@ -51,6 +60,7 @@ const Canvas = (props: Props) => {
   usePresenceStore((state) => state.liveblocks.isStorageLoading);
   usePresenceStore((state) => state.stageScale);
   usePresenceStore((state) => state.stageViewBox);
+  usePresenceStore((state) => state.renderCount);
 
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
   const updateStageViewBox = usePresenceStore(
@@ -62,7 +72,78 @@ const Canvas = (props: Props) => {
   const leaveRoom = useCanvasEditorStore((state) => state.liveblocks.leaveRoom);
   const getSceneById = useCanvasEditorStore((state) => state.getSceneById);
   const selectedScene = getSceneById(selectedSceneId!);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const isSelecting = useRef(false);
 
+
+  const handleStageClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // If we are selecting with rect, do nothing
+    if (selectionRectangle.visible) {
+      return;
+    }
+
+    // If click on empty area - remove all selections
+    if (e.target === e.target.getStage()) {
+      setSelectedIds([]);
+      return;
+    }
+
+    // Do nothing if clicked NOT on our rectangles
+    if (!e.target.hasName('rect')) {
+      return;
+    }
+
+    const clickedId = e.target.id();
+    
+    // Do we pressed shift or ctrl?
+    const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+    const isSelected = selectedIds.includes(clickedId);
+
+    if (!metaPressed && !isSelected) {
+      // If no key pressed and the node is not selected
+      // select just one
+      setSelectedIds([clickedId]);
+    } else if (metaPressed && isSelected) {
+      // If we pressed keys and node was selected
+      // we need to remove it from selection
+      setSelectedIds(selectedIds.filter(id => id !== clickedId));
+    } else if (metaPressed && !isSelected) {
+      // Add the node into selection
+      setSelectedIds([...selectedIds, clickedId]);
+    }
+  };
+
+    const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // Do nothing if we mousedown on any shape
+    if (e.target !== e.target.getStage()) {
+      return;
+    }
+    
+    // Start selection rectangle
+    isSelecting.current = true;
+    const stage = e.target.getStage();
+    if (!stage) {
+      console.error("Stage is not defined in handleMouseDown");
+      return;
+    }
+    
+    // Get relative position to stage (accounting for zoom and pan)
+    const pos = stage.getRelativePointerPosition();
+    if (!pos) {
+      console.error("Pointer position is null");
+      return;
+    }
+    
+    setSelectionRectangle({
+      visible: true,
+      x1: pos.x,
+      y1: pos.y,
+      x2: pos.x,
+      y2: pos.y,
+    });
+  };
+
+    
   console.log("Current stage:", selectedScene);
 
   // Create throttled functions once, not on every call
@@ -229,7 +310,67 @@ const Canvas = (props: Props) => {
       e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
       e.evt.clientY - containerRef.current!.getBoundingClientRect().top
     );
+
+    // Do nothing if we didn't start selection
+    if (!isSelecting.current) {
+      return;
+    }
+    const stage = e.target.getStage();
+    if (!stage) {
+      console.error("Stage is not defined in handleMouseMove");
+      return;
+    }
+    
+    // Get relative position to stage (accounting for zoom and pan)
+    const pos = stage.getRelativePointerPosition();
+    if (!pos) {
+      console.error("Pointer position is null in handleMouseMove");
+      return;
+    }
+    
+    setSelectionRectangle(prev => ({
+      ...prev,
+      x2: pos.x,
+      y2: pos.y,
+    }));
   };
+  const handleMouseUp = () => {
+    // Do nothing if we didn't start selection
+    if (!isSelecting.current) {
+      return;
+    }
+    isSelecting.current = false;
+
+    const selBox = {
+      x: Math.min(selectionRectangle.x1, selectionRectangle.x2),
+      y: Math.min(selectionRectangle.y1, selectionRectangle.y2),
+      width: Math.abs(selectionRectangle.x2 - selectionRectangle.x1),
+      height: Math.abs(selectionRectangle.y2 - selectionRectangle.y1),
+    };
+
+    const selected = selectedScene.filter(compAttrs => {
+      // Check if rectangle intersects with selection box
+      const compNode = stageRef.current?.findOne(`#${compAttrs.id}`);
+      if (!compNode) {
+        console.warn(`Component with id ${compAttrs.id} not found`);
+        return false;
+      }
+      return Konva.Util.haveIntersection(selBox, compNode.getClientRect());
+    });
+    
+    setSelectedIds(selected.map(rect => rect.id));
+    
+    // Update visibility in timeout, so we can check it in click event
+    setTimeout(() => {
+      setSelectionRectangle(prev => ({
+        ...prev,
+        visible: false,
+      }));
+    }, 0);
+  };
+
+
+
 
   const getInitialScale = () => {
     if (!containerRef.current) return 1;
@@ -272,7 +413,6 @@ const Canvas = (props: Props) => {
           ref={stageRef}
           width={containerRef.current.clientWidth}
           height={containerRef.current.clientHeight}
-          draggable={true}
           x={containerRef.current.clientWidth / 2}
           y={containerRef.current.clientHeight / 2}
           scaleX={getInitialScale()}
@@ -280,6 +420,11 @@ const Canvas = (props: Props) => {
           onWheel={handleWheel}
           onDragMove={handleDrag}
           onMouseMove={handleMouseMove}
+
+
+          onMouseDown={handleMouseDown}
+          onMouseup={handleMouseUp}
+          onClick={handleStageClick}
         >
           {/* Background and overlay layer */}
           <Layer listening={false}>
@@ -311,6 +456,17 @@ const Canvas = (props: Props) => {
                 }
                 return null;
               })}
+              {/* TODO: implemement select , resize and rotote */}
+
+                      {selectionRectangle.visible && (
+                        <Rect
+                          x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
+                          y={Math.min(selectionRectangle.y1, selectionRectangle.y2)}
+                          width={Math.abs(selectionRectangle.x2 - selectionRectangle.x1)}
+                          height={Math.abs(selectionRectangle.y2 - selectionRectangle.y1)}
+                          fill="rgba(0,0,255,0.5)"
+                        />
+                      )}
           </Layer>
         </Stage>
       </div>
