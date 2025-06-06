@@ -74,6 +74,11 @@ const Canvas = (props: Props) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const isSelecting = useRef(false);
 
+  useEffect(() => {
+    setSelectedIds([]);
+  }
+  , [selectedSceneId]);
+
   const handleStageClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // If we are selecting with rect, do nothing
     if (selectionRectangle.visible) {
