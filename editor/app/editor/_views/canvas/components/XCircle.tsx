@@ -4,10 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Circle, Transformer } from "react-konva";
 import Konva from "konva";
 import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
-import {
-  DElement,
-  DElementProps,
-} from "@/app/editor/_utils/zustand/konva/types";
 
 type Props = CircleConfig & NodeConfig;
 

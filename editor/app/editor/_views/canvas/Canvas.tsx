@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import XElement from "./components/XElement";
 import CanvasBackground from "./components/CanvasBackground";
 import XSelect from "./components/XSelect";
+import SelectionRectangle from "./components/SelectionRectangle";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -460,17 +461,7 @@ const Canvas = (props: Props) => {
                 return null;
               })}
             <XSelect nodeIds={selectedIds} />
-            {selectionRectangle.visible && (
-              <Rect
-                x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
-                y={Math.min(selectionRectangle.y1, selectionRectangle.y2)}
-                width={Math.abs(selectionRectangle.x2 - selectionRectangle.x1)}
-                height={Math.abs(selectionRectangle.y2 - selectionRectangle.y1)}
-                stroke="rgba(0, 0, 255, 0.5)"
-                strokeWidth={2}
-                fill="rgba(0,0,255,0.2)"
-              />
-            )}
+            <SelectionRectangle {...selectionRectangle} />
           </Layer>
         </Stage>
       </div>
