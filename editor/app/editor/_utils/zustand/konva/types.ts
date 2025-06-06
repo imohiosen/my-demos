@@ -61,6 +61,7 @@ export type DMedia = {
 }
 
 export type DElementProps = {
+  id?: string; // Unique identifier for the element
   x?: number; // X position of the element
   y?: number; // Y position of the element
   width?: number; // Optional width for rectangle and image
