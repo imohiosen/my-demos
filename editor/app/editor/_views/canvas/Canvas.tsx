@@ -83,18 +83,13 @@ const Canvas = (props: Props) => {
 
   const handleStageClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // If we are selecting with rect, do nothing
+    
     if (selectionRectangle.visible) {
       return;
     }
 
-    // If click on empty area - remove all selections
     if (e.target === e.target.getStage()) {
       setSelectedIds([]);
-      return;
-    }
-
-    // Do nothing if clicked NOT on our rectangles
-    if (!e.target.hasName("rect")) {
       return;
     }
 
