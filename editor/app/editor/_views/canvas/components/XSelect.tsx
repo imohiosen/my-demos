@@ -29,6 +29,15 @@ const XSelect = (props: Props) => {
      <Transformer 
         ref={ref}
         anchorSize={8}
+        anchorStrokeWidth={1}
+        anchorFill="white"
+        anchorCornerRadius={100}
+
+        borderStrokeWidth={2}
+        borderDash={[4, 2]}
+        resizeEnabled={true}
+        rotateFill="white"
+        rotateAnchorOffset={20}
         rotateEnabled={true}
         enabledAnchors={[
           'top-left', 'top-right', 'bottom-left', 'bottom-right',

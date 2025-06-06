@@ -8,7 +8,7 @@ import {
   usePresenceStore,
 } from "../../_utils/zustand/konva/impl";
 import throttle from "lodash/throttle";
-import { LucideDownload, LucideTarget } from "lucide-react";
+import { LucideDownload, LucideTarget, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import XGroup from "./components/XGroup";
 import XElement from "./components/XElement";
@@ -352,15 +352,14 @@ const Canvas = (props: Props) => {
       }
 
       if (stageRef.current) {
-        const compBox = compNode.getClientRect({relativeTo: stageRef.current});
+        const compBox = compNode.getClientRect({
+          relativeTo: stageRef.current,
+        });
         return Konva.Util.haveIntersection(selBox, compBox);
-      } else{
+      } else {
         console.error("Stage reference is not defined in handleMouseUp");
         return false;
       }
-
-
-
     });
 
     setSelectedIds(selected.map((rect) => rect.id));
@@ -461,8 +460,7 @@ const Canvas = (props: Props) => {
                 }
                 return null;
               })}
-            {/* TODO: implemement select , resize and rotote */}
-
+            <XSelect nodeIds={selectedIds} />
             {selectionRectangle.visible && (
               <Rect
                 x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
