@@ -1,22 +1,29 @@
 "use client";;
 import { Button } from "@/components/ui/button";
 import { LucideRedo } from "lucide-react";
-import { usePresenceStore } from "../../_utils/zustand/konva/impl";
 import { useCallback } from "react";
 
 type Props = {
   sceneId: string;
+  selectedStageId?: string;
+  updateSelectedStageId: (id: string) => void;
 };
 
 // react functional component
-const PlaybackScene = ({ sceneId }: Props) => {
-  const selectedStageId = usePresenceStore((state) => state.selectedStageId);
-  const updateSelectedStageId = usePresenceStore((state) => state.updateSelectedStageId);
+const PlaybackScene = ({ 
+  sceneId,
+  selectedStageId,
+  updateSelectedStageId
+ }: Props) => {
+  // const selectedStageId = usePresenceStore((state) => state.selectedStageId);
+  // const updateSelectedStageId = usePresenceStore((state) => state.updateSelectedStageId);
   
   const isSelected = selectedStageId === sceneId;
+  console.log("PlaybackScene rendered with sceneId:", sceneId, "isSelected:", selectedStageId);
 
   const handleClick = useCallback(() => {
     updateSelectedStageId(sceneId);
+    console.log("Selected scene ID:", sceneId, selectedStageId);
   }, [sceneId, updateSelectedStageId]);
 
   return (

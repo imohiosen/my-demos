@@ -22,23 +22,7 @@ const XLayer = (props: Props) => {
     <Layer key={layer.id} {...layer.attributes}>
       {layer.groups.map((group) => {
         return (
-          <XGroup key={group.id} {...group.attributes} draggable={true}>
-            {group.components.map((component) => {
-              return (
-                component.type === "element" &&
-                component.element && (
-                  <XElement
-                    key={component.id}
-                    {...component.element.attribute}
-                    componentId={component.id}
-                    groupId={group.id}
-                    layerId={layer.id}
-                    stageId={currentStage.id}
-                  />
-                )
-              );
-            })}
-          </XGroup>
+          
         );
       })}
     </Layer>

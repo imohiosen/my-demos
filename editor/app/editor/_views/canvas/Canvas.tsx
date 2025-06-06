@@ -1,24 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
-import { use, useCallback, useEffect, useRef, useState } from "react";
-import { Group, Layer, Rect, Stage, Text } from "react-konva";
+"use client";;
+import { useCallback, useEffect, useRef } from "react";
+import { Group, Layer, Rect, Stage } from "react-konva";
 import Konva from "konva";
 import {
   useCanvasEditorStore,
   usePresenceStore,
 } from "../../_utils/zustand/konva/impl";
-import { DLayer, DStage, useStageRefState, VideoDraftState } from "../../_utils/zustand/konva/store";
 import throttle from "lodash/throttle";
-import { LucideDownload, LucideTarget, UndoIcon } from "lucide-react";
+import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import XGroup from "./components/XGroup";
-import XText from "./components/XText";
-import { stages } from "konva/lib/Stage";
-import XRect from "./components/XRect";
-import XCircle from "./components/XCircle";
-import XSelection from "./components/XSelection";
 import XElement from "./components/XElement";
-import XLayer from "./components/XLayer";
+import { DGroup } from "../../_utils/zustand/konva/types";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -83,16 +77,21 @@ const Canvas = (props: Props) => {
   usePresenceStore((state) => state.stageScale);
   usePresenceStore((state) => state.stageViewBox);
 
+
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
   const updateStageViewBox = usePresenceStore(
     (state) => state.updateStageViewBox
   );
-  const selectedStageId = usePresenceStore((state) => state.selectedStageId);
+  const selectedSceneId = usePresenceStore((state) => state.selectedStageId);
+
+  
 
   const enterRoom = useCanvasEditorStore((state) => state.liveblocks.enterRoom);
   const leaveRoom = useCanvasEditorStore((state) => state.liveblocks.leaveRoom);
-  const getStageById = useCanvasEditorStore((state) => state.getStageById);
-  const currentStage = getStageById(selectedStageId!);
+  const getSceneById = useCanvasEditorStore((state) => state.getSceneById);
+  const currentStage = getSceneById(selectedSceneId!);
+
+  console.log("Current stage:", currentStage);
 
   
 
@@ -360,14 +359,14 @@ const Canvas = (props: Props) => {
           onMouseMove={handleMouseMove}
         >
           {/* Content layers */}
-          {currentStage &&
+          {/* {currentStage &&
             [currentStage.layer].map((layer) => (
               <XLayer
                 key={layer.id}
                 layer={layer}
                 currentStage={currentStage}
               />
-            ))}
+            ))} */}
 
           {/* Background and overlay layer */}
           <Layer listening={false}>
@@ -387,36 +386,40 @@ const Canvas = (props: Props) => {
               <BgOverlay />
             </Group>
           </Layer>
+            <Layer listening={false}>
+            {currentStage && (
+              currentStage.map((component) => (
+                component.type === "element" &&
+                component.element && (
+                  <XElement
+                    key={component.id}
+                    {...component.element.attribute}
+                    componentId={component.id}
+                    stageId={selectedSceneId}
+                  />
+                )
+              ))
+            )}
 
-              {/* Main canvas background */}
-              {currentStage &&
-                [currentStage.layer].map((layer) => (
-                  <Layer listening={false} key={layer.id} id={layer.id}>
-                    {layer.groups.map((group) => {
-                      return (
-                        <Group listening={false} key={group.id} id={group.id}>
-                          {group.components.map((component) => {
-                            if (component.type === "text") {
-                              return (
-                                <XSelection 
-                                key={component.id}
-                                selection={{
-                                  componentId: component.id,
-                                  groupId: group.id,
-                                  layerId: layer.id,
-                                  stageId: currentStage.id,
-                                  type: "component",
-                                }}
-                                shouldDisplay={true}
-                                /> 
-                              );
-                            }
-                          })}
-                          </Group>
-                      );
-                    })}
-          </Layer>
-                ))}
+
+              {/* <XGroup key={group.id} {...group.attributes} draggable={true}>
+            {group.components.map((component) => {
+              return (
+                component.type === "element" &&
+                component.element && (
+                  <XElement
+                    key={component.id}
+                    {...component.element.attribute}
+                    componentId={component.id}
+                    groupId={group.id}
+                    layerId={layer.id}
+                    stageId={currentStage.id}
+                  />
+                )
+              );
+            })}
+          </XGroup> */}
+              </Layer >
         </Stage>
       </div>
 

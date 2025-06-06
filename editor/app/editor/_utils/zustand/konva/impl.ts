@@ -4,20 +4,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DGroupProps, DLayerProps, Selection } from "./store";
 import {
-  DAudio,
-  DAudioCaptionProps,
-  DAvatarProps,
-  DBackgroundProps,
-  DComponent,
-  DElementProps,
-  DGroup,
-  DLayer,
-  DMediaProps,
-  DStage,
-  DTextProps,
-  Point,
   Presence,
   VideoDraftActions,
   VideoDraftState,
@@ -25,11 +12,9 @@ import {
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { createClient } from "@liveblocks/client";
-import { title } from "process";
-import { canvasTitleStyle } from "../../addTextStyles";
-import { text } from "stream/consumers";
 import Konva from "konva";
-import { Layer } from "react-konva";
+import { WritableDraft } from "immer";
+import { DComponent, DElementProps, DGroup, Point, Selection } from "./types";
 
 type State = VideoDraftState;
 type Actions = VideoDraftActions;
@@ -76,7 +61,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
           // Initial state
           current: {
             id: get()?.id || "",
-            stages: [],
+            scenes: {},
             portrait: "landscape",
           },
           history: {
@@ -84,46 +69,38 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             future: [],
             maxHistorySize: 100,
           },
-          id: "test-002",
-          addStage: () => {
+          id: "test-004",
+          addScene: () => {
             set((state) => {
-              const newStage: DStage = {
-                id: generateId(),
-                name: `Stage ${state.current.stages.length + 1}`,
-                layer: {
-                  id: generateId(),
-                  groups: [
-                    {
-                      id: generateId(),
-                      components: [],
-                      attributes: {} as DGroupProps,
-                    },
-                  ],
-                  attributes: {} as DLayerProps,
-                },
-              };
-              state.current.stages = [...state.current.stages, newStage];
+              state.current.scenes[generateId()] = [];
             });
           },
-          getStageById(stageId) {
+          getScene(id: string) {
             const state = get();
-            const stage = state.current.stages.find((s) => s.id === stageId);
-            return stage;
+            if (!state.current.scenes[id]) {
+              console.error(`Scene with id ${id} not found`);
+              // clear zustand local persist
+              return [];
+
+            }
           },
           addText(text, style) {
             set((state) => {
-              const stage = state.current.stages.find(
-                (s) => s.id === usePresenceStore.getState().selectedStageId
-              );
-              if (!stage) return;
+              const sceneId = usePresenceStore.getState().selectedStageId; // Ensure the selected stage ID is set
+              if (!sceneId) {
+                throw new Error(`Error: No stage selected`);
+              }
+              const stage = state.current.scenes[sceneId];
 
-              const layer = stage.layer; // Assuming adding to the first layer
-              if (!layer) return;
+              const scene = state.current.scenes[sceneId];
 
-              const group = layer.groups[0]; // Assuming adding to the first group
-              if (!group) return;
+              if (!scene) {
+                console.error(`Scene with id ${sceneId} not found`);
+                return;
+              }
 
-              const newComponent: DComponent = {
+              // Create the component directly in the immer draft state
+              state.current.scenes[sceneId].push({
                 id: generateId(),
                 type: "text",
                 text: {
@@ -138,9 +115,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
                   },
                 },
                 metadata: createMetadata(),
-              };
-
-              group.components = [...group.components, newComponent];
+              });
             });
           },
           handleTextDragEnd: (
@@ -148,19 +123,17 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             e: Konva.KonvaEventObject<DragEvent>
           ) => {
             set((state) => {
-              const textComp = getComponentBySelection(selection, state);
+              const { comp: textComp, selectedScene } =
+                getComponentFromSelectedScene(selection, state);
 
               if (textComp.type !== "text") {
-                console.error("Selected component is not a text component");
-                return;
+                throw new Error(
+                  `Selected component is not a text component: ${textComp.type}`
+                );
               }
               if (!textComp.text || !textComp.text.attribute) {
-                console.error("Text component does not have text attribute");
-                return;
+                throw new Error(`Text component does not have text attribute`);
               }
-              console.log("Dragging text component:", textComp.id);
-              console.log("Selection deltaX:", e);
-
               textComp.text.attribute = { ...e?.target?.attrs };
             });
           },
@@ -169,7 +142,8 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             attrs: Partial<DElementProps>
           ) => {
             set((state) => {
-              const component = getComponentBySelection(selection, state);
+              const { comp: component, selectedScene } =
+                getComponentFromSelectedScene(selection, state);
 
               if (component.type !== "element") {
                 console.error(
@@ -192,116 +166,56 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
                 ...component.element.attribute,
                 ...attrs,
               };
-              console.log ( attrs)
+              console.log(attrs);
             });
           },
           getComponentBoundingRect: (selection: Selection) => {
-            const state = get();
-            const component = getComponentBySelection(selection, state);
-            if (!component) {
-              console.error("Component not found for selection", selection);
-              return null;
-            }
-
+            
             // Assuming the component has an attribute with x, y, width, height
             const {
               x = 0,
               y = 0,
               width = 100,
               height = 100,
-            } = component.element?.attribute || {};
+            } = {};
 
             return { x, y, width, height };
           },
 
-          addElement: (component: DComponent, selection: Selection) => {
-            set((state: State) => {
-              const { layerId, stageId } = selection;
-              if (!stageId)
-                return console.error(
-                  `Stage ID is missing in selection: ${selection}`
+          addElement: (component: DComponent) => {
+            set((state) => {
+              const sceneId = usePresenceStore.getState().selectedStageId; // Ensure the selected stage ID is set
+              if (!sceneId) {
+                throw new Error(`Error: No stage selected`);
+              }
+              const scene = state.current.scenes[sceneId];
+              if (!scene) {
+                throw new Error(
+                  `Scene with id ${sceneId} not found`
                 );
-              if (!layerId)
-                return console.error(
-                  `Layer ID is missing in selection: ${selection}`
-                );
+              }
 
-              const stage = state.current.stages.find((s) => s.id === stageId);
-              if (!stage)
-                return console.error(`Stage with id ${stageId} not found`);
-
-              const layer = stage.layer;
-              if (!layer)
-                return console.error(
-                  `Layer with id ${layerId} not found in stage ${stageId}`
-                );
-
-              layer.groups.push({
+              // Create the component directly in the immer draft state
+              state.current.scenes[sceneId].push({
                 id: generateId(),
-                components: [component],
-                attributes: {} as DGroupProps, // Initialize with empty attributes
+                type: "element",
+                element: {
+                  attribute: {
+                    ...component.element?.attribute,
+                  },
+                },
+                metadata: createMetadata(),
               });
-              console.log(
-                `Added component to layer ${layerId} in stage ${stageId}`, component
-              );
-            });
-          },
-          removeElement: (selection: Selection) => {
-            set((state: State) => {
-              const { componentId, groupId, layerId, stageId } = selection;
-              if (!componentId || !groupId || !layerId || !stageId)
-                return console.error("Selection is incomplete:", selection);
-
-              const stage = state.current.stages.find((s) => s.id === stageId);
-              if (!stage)
-                return console.error(`Stage with id ${stageId} not found`);
-
-              const layer = stage.layer;
-              if (!layer)
-                return console.error(
-                  `Layer with id ${layerId} not found in stage ${stageId}`
-                );
-
-              const group = layer.groups.find((g) => g.id === groupId);
-              if (!group)
-                return console.error(
-                  `Group with id ${groupId} not found in layer ${layerId}, stage ${stageId}`
-                );
-
-              group.components = group.components.filter(
-                (c) => c.id !== componentId
-              );
             });
           },
 
-          getCurrentLayerSelection: (): Selection => {
+
+          getSceneById: (id: string): (DComponent)[]  => {
             const state = get();
-            const selectedStageId = usePresenceStore.getState().selectedStageId;
-            if (!selectedStageId) throw new Error(`Stage ID is not selected`);
-            const stage = state.current.stages.find(
-              (s: DStage) => s.id === selectedStageId
-            );
-            if (!stage)
-              throw new Error(`Stage with id ${selectedStageId} not found`);
-            const layer = stage.layer; // Assuming we want the first layer
-            if (!layer)
-              throw new Error(`Layer not found in stage ${selectedStageId}`);
-            return {
-              layerId: layer.id,
-              stageId: stage.id,
-              type: "layer",
-            };
-          },
-          getCurrentLayer: (): DLayer | undefined => {
-            const state = get();
-            const selectedStageId = usePresenceStore.getState().selectedStageId;
-            if (!selectedStageId) throw new Error(`Stage ID is not selected`);
-            const stage = state.current.stages.find(
-              (s: DStage) => s.id === selectedStageId
-            );
-            if (!stage)
-              throw new Error(`Stage with id ${selectedStageId} not found`);
-            return stage.layer; // Assuming we want the first layer
+            if (!state.current.scenes[id]) {
+              return [];
+            }
+            return state.current.scenes[id];
           },
         }),
         {
@@ -311,7 +225,11 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
           },
         }
       )
-    )
+    ),
+    {
+      name: "video-draft-store", // Name of the store for debugging
+      version: 1, // Version of the store
+    }
   )
 );
 
@@ -323,32 +241,32 @@ const init = (set, get) => ({
   stageViewBox: { x: 0, y: 0 },
   renderCount: 0,
   updateCursorPosition: (position: Point) => {
-    set((state) => {
+    set((state: Presence) => {
       state.cursorPosition = position;
     });
   }, // Update cursor position
   updateSelectedItems: (items: Selection[]) => {
-    set((state) => {
+    set((state: Presence) => {
       state.selectedItems = items;
     });
   }, // Update selected items
   updateStagePosition: (position: Point) => {
-    set((state) => {
+    set((state: Presence) => {
       state.stagePosition = position;
     }); // Update stage position
   },
   updateStageViewBox: (viewBox: Point) => {
-    set((state) => {
+    set((state: Presence) => {
       state.stageViewBox = viewBox;
     }); // Update stage view box
   },
   updateStageScale: (scale: Point) => {
-    set((state) => {
+    set((state: Presence) => {
       state.stageScale = scale;
     }); // Update stage scale
   },
   updateSelectedStageId: (stageId: string) => {
-    set((state) => {
+    set((state: Presence) => {
       state.selectedStageId = stageId;
     }); // Update selected stage ID
     // get().saveSelectionToLocalStorage(); // Save to localStorage
@@ -360,7 +278,7 @@ const init = (set, get) => ({
     set((state) => {
       state.renderCount += 1; // Increment render count to trigger re-render
     });
-  }
+  },
   // Add more actions as needed
 });
 
@@ -394,44 +312,39 @@ export const usePresenceStore = create<WithLiveblocks<Presence>>()(
           selectedStageId: state.selectedStageId,
         }),
       }
-    )
+    ), 
+    {
+      name: "presence-store", // Name of the store for debugging
+      version: 1, // Version of the store
+    }
   )
 );
 
-function getComponent(
-  componentId: string,
-  groupId: string,
-  layerId: string,
-  stageId: string,
-  state: VideoDraftState
-): DComponent {
-  const stage = state.current.stages.find((s) => s.id === stageId);
-  if (!stage) throw new Error(`Stage with id ${stageId} not found`);
-
-  const layer = stage.layer;
-  if (!layer)
-    throw new Error(`Layer with id ${layerId} not found in stage ${stageId}`);
-
-  const group = layer.groups.find((g) => g.id === groupId);
-  if (!group)
-    throw new Error(
-      `Group with id ${groupId} not found in layer ${layerId}, stage ${stageId}`
-    );
-  const c = group.components.find((c) => c.id === componentId);
-  if (!c)
-    throw new Error(
-      `Component with id ${componentId} not found in group ${groupId}, layer ${layerId}, stage ${stageId}`
-    );
-  return c;
-}
-
-function getComponentBySelection(
+function getComponentFromSelectedScene(
   selection: Selection,
-  state: VideoDraftState
-): DComponent {
-  const { componentId, groupId, layerId, stageId } = selection;
-  if (!componentId || !groupId || !layerId || !stageId) {
-    throw new Error("Selection is incomplete");
+  state: WritableDraft<WithLiveblocks<VideoDraftState & VideoDraftActions>>
+) {
+  const selectedScene = usePresenceStore.getState().selectedStageId;
+  if (!selectedScene) throw new Error(`Stage ID is not selected`);
+  let comp;
+  if (selection.groupId) {
+    const group = state.current.scenes[selectedScene].find(
+      (g) => g.id === selection.groupId
+    ) as DGroup;
+    comp = group?.components.find(
+      (c) => c.id === selection.componentId
+    ) as DComponent;
+  } else if (selection.componentId) {
+    comp = state.current.scenes[selectedScene].find(
+      (c) => c.id === selection.componentId
+    ) as DComponent;
   }
-  return getComponent(componentId, groupId, layerId, stageId, state);
+
+  if (!comp) {
+    throw new Error(
+      `Component with id ${selection.componentId} not found in scene ${selectedScene}`
+    );
+  }
+  return { comp, selectedScene };
 }
+

@@ -10,7 +10,6 @@ import { useCanvasEditorStore, usePresenceStore } from "@/app/editor/_utils/zust
 type Props = CircleConfig & NodeConfig;
 
 const XCircle = (props: Props) => {
-  const groupRef = useRef<Konva.Group>(null);
   const circleRef = useRef<Konva.Circle>(null);
   const mergeCircleAttrs = useCanvasEditorStore(state => state.mergeCircleAttrs);
   

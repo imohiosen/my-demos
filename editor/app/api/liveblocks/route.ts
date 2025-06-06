@@ -19,16 +19,19 @@ export async function POST(request: Request) {
     console.error("Room already exists, continuing: " + roomId );
   }
 
-  const { status, body } = await liveblocks.identifyUser({
+
+
+  await liveblocks.updateRoom(roomId, {
+    usersAccesses: {
+      [userId]: ["room:write"],
+    },
+  });
+
+    const { status, body } = await liveblocks.identifyUser({
     userId,
     groupIds: [],
   });
 
-  await liveblocks.updateRoom(roomId, {
-    usersAccesses: {
-      userId: ["room:write"],
-    },
-  });
 
   return new Response(body, { status });
 }

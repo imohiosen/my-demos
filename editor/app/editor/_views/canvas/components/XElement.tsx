@@ -1,7 +1,7 @@
 import { Rect } from "react-konva";
 import XCircle from "./XCircle";
 import XRect from "./XRect";
-import { DElementProps } from "@/app/editor/_utils/zustand/konva/store";
+import { DElementProps } from "@/app/editor/_utils/zustand/konva/types";
 
 type Props = DElementProps
 

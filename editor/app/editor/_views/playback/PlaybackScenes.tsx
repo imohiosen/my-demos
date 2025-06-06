@@ -3,19 +3,21 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LucidePlay, LucidePlus } from "lucide-react";
 import PlaybackScene from "./PlaybackScene";
-import { useCanvasEditorStore } from "../../_utils/zustand/konva/impl";
+import { useCanvasEditorStore, usePresenceStore } from "../../_utils/zustand/konva/impl";
 
 type Props = {
 };
 
 // react functional component
 const PlaybackScenes = (props: Props) => {
-  const addScene = useCanvasEditorStore((state) => state.addStage);
-  const scenes = useCanvasEditorStore((state) => state.current.stages);
-
+  const addScene = useCanvasEditorStore((state) => state.addScene);
+  const scenes = useCanvasEditorStore((state) => state.current.scenes);
+  const selectedStageId = usePresenceStore((state) => state.selectedStageId);
+  const updateSelectedStageId = usePresenceStore((state) => state.updateSelectedStageId);
+  
 
   // Convert scenes object to array for rendering
-  const sceneArray = Object.values(scenes || []);
+  const sceneArray = Object.entries(scenes || []);
 
   const handleAddScene = () => {
     addScene();
@@ -28,8 +30,13 @@ const PlaybackScenes = (props: Props) => {
       </Button>
       <ScrollArea className="flex-1 mx-4 w-[60%]">
         <div className=" flex flex-row items-center gap-2 h-[160px] m-0 p-0">
-          {sceneArray.map((scene) => (
-            <PlaybackScene key={scene.id} sceneId={scene.id} />
+          {sceneArray.map(([id, scene]) => (
+            <PlaybackScene 
+            key={id} 
+            sceneId={id} 
+            selectedStageId={selectedStageId}
+            updateSelectedStageId={updateSelectedStageId}
+            />
           ))}
         </div>
         <ScrollBar orientation="horizontal" />

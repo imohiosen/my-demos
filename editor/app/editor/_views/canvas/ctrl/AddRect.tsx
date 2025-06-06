@@ -78,7 +78,6 @@ type Props = {};
 
 const CircleButton = () => {
   const addElement = useCanvasEditorStore(state => state.addElement);
-  const getCurrentLayerSelection = useCanvasEditorStore(state => state.getCurrentLayerSelection);
   const renderCanvas = usePresenceStore(state => state.renderCanvas);
 
 
@@ -96,7 +95,7 @@ const CircleButton = () => {
           type: "circle",
         }
       },
-    }, getCurrentLayerSelection());
+    });
     renderCanvas();
   };
 
