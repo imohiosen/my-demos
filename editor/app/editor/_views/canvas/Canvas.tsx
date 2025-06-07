@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import CanvasBackground from "./components/CanvasBackground";
 import XSelect from "./components/XSelect";
 import SelectionRectangle from "./components/SelectionRectangle";
-import X$ from "./components/X";
+import Enhance from "./components/Enhance";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -224,6 +224,8 @@ const Canvas = (props: Props) => {
       direction > 0
         ? oldScale * ZOOM_SCALE_FACTOR
         : oldScale / ZOOM_SCALE_FACTOR;
+
+        
 
     newScale = Math.max(MIN_ZOOM_RATIO, Math.min(MAX_ZOOM_RATIO, newScale));
 
@@ -449,12 +451,12 @@ const Canvas = (props: Props) => {
                   const elem = component.element.attribute;
                   if (elem.type === "circle") {
                     return (
-                      <X$ key={component.componentId} selection={{
+                      <Enhance key={component.componentId} selection={{
                         sceneId: component.sceneId!,
                         componentId: component.componentId,
                       }}>
                         <Circle {...elem} id={component.componentId} />
-                      </X$>
+                      </Enhance>
                     );
                   } else {
                     console.error(

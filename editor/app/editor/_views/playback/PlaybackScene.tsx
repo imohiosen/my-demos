@@ -21,6 +21,7 @@ const PlaybackScene = ({
   sceneId,
   selectedStageId,
   updateSelectedStageId,
+  
   scene,
  }: Props) => {
   

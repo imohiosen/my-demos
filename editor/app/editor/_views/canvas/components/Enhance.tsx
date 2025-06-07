@@ -8,7 +8,7 @@ import { Selection } from "@/app/editor/_utils/zustand/konva/types";
 
 type Props =  {children: React.ReactNode; selection: Selection}
 
-const X$ = (props: Props) => {
+const Enhance = (props: Props) => {
   const nodeRef = useRef<Konva.Node>(null);
   const outlineRef = useRef<Konva.Transformer>(null);
   const mergeAttributes = useCanvasEditorStore(
@@ -80,4 +80,4 @@ const X$ = (props: Props) => {
   );
 };
 
-export default X$;
+export default Enhance;
