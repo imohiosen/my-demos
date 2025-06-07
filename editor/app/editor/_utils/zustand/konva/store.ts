@@ -32,7 +32,7 @@ export type Presence = {
     updateStagePosition: (position: Point) => void; // Update stage position
     updateStageViewBox: (viewBox: Point) => void; // Update stage view box
     updateStageScale: (scale: Point) => void; // Update stage scale
-    updateSelectedStageId: (stageId: string) => void; // Update selected group ID
+    updateSelectedStageId: (sceneId: string) => void; // Update selected group ID
 
     saveSelectionToLocalStorage: () => void;
     getSelectionFromLocalStorage: () => string | null;

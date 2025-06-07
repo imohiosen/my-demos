@@ -15,7 +15,7 @@ const XCircle = (props: Props) => {
     <>
       {/* Main circle */}
       <X selection={{
-        stageId: props.sceneId!,
+        sceneId: props.sceneId!,
         componentId: props.componentId,
         groupId: props.groupId,
       }}>

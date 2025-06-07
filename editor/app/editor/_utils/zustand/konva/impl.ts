@@ -265,12 +265,12 @@ const init = (set, get) => ({
       state.stageScale = scale;
     }); // Update stage scale
   },
-  updateSelectedStageId: (stageId: string) => {
+  updateSelectedStageId: (sceneId: string) => {
     set((state: Presence) => {
-      state.selectedStageId = stageId;
+      state.selectedStageId = sceneId;
     }); // Update selected stage ID
     // get().saveSelectionToLocalStorage(); // Save to localStorage
-    // console.log("Selected stage ID updated:", stageId);
+    // console.log("Selected stage ID updated:", sceneId);
   },
   renderCanvas: () => {
     // This function can be used to trigger a re-render of the canvas

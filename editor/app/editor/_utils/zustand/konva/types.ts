@@ -25,7 +25,7 @@ export type DAvatar = {
 //     fontStyle?: string; // Optional font style (e.g., 'bold', 'italic')
 //     align?: string; // Optional text alignment (e.g., 'left', 'center', 'right')
 
-//     stageId?: string; // Optional stage ID for context
+//     sceneId?: string; // Optional stage ID for context
 //     layerId?: string; // Optional layer ID for context
 //     groupId?: string; // Optional group ID for context
 //     componentId?: string; // Optional component ID for context
@@ -36,7 +36,7 @@ export type DTextProps = TextConfig & NodeConfig & {
 
     type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
 
-    stageId?: string; // Optional stage ID for context
+    sceneId?: string; // Optional stage ID for context
     layerId?: string; // Optional layer ID for context
     groupId?: string; // Optional group ID for context
     componentId?: string; // Optional component ID for context
@@ -156,7 +156,7 @@ export type DGroup = {
         modifiedAt: number;
     };
 
-    stageId?: string; // Optional stage ID for context
+    sceneId?: string; // Optional stage ID for context
     layerId?: string; // Optional layer ID for context
     groupId?: string; // Optional group ID for context
 }
@@ -173,7 +173,7 @@ export type DLayerProps = {
     visible?: boolean; // Visibility of the layer
 
 
-  stageId?: string; // Optional stage ID for context
+  sceneId?: string; // Optional stage ID for context
   layerId?: string; // Optional layer ID for context
 }
 
@@ -205,7 +205,7 @@ export type DStageProps = {
     backgroundColor?: string;
 
 
-  stageId?: string; // Optional stage ID for context
+  sceneId?: string; // Optional stage ID for context
 };
 
 export type DStage = { // Renamed from Stage to avoid conflict
@@ -225,7 +225,7 @@ export type VideoDraft = {
 }
 
 export type Selection = {
-    stageId: string; // ID of the stage where the selection is made
+    sceneId: string; // ID of the stage where the selection is made
     groupId?: string; // ID of the selected group
     componentId?: string; // ID of the selected component
 }
