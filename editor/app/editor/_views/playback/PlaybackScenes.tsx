@@ -36,6 +36,8 @@ const PlaybackScenes = (props: Props) => {
             sceneId={id} 
             selectedStageId={selectedStageId}
             updateSelectedStageId={updateSelectedStageId}
+            scene={scene}
+            
             />
           ))}
         </div>
