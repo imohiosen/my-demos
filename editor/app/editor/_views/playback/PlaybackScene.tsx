@@ -1,10 +1,8 @@
 "use client";;
 import { Button } from "@/components/ui/button";
-import { Stage } from "konva/lib/Stage";
 import { LucideRedo } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { DComponent } from "../../_utils/zustand/konva/types";
-import Konva from "konva";
 import React from "react";
 
 const CANVAS_WIDTH = 1920;
@@ -21,7 +19,6 @@ const PlaybackScene = ({
   sceneId,
   selectedStageId,
   updateSelectedStageId,
-  
   scene,
  }: Props) => {
   
@@ -41,48 +38,6 @@ const PlaybackScene = ({
     updateSelectedStageId(sceneId);
   }, [sceneId, updateSelectedStageId]);
 
-  const generateThumbnail = useCallback(() => {
-    // Create a temporary stage for thumbnail generation
-    const tempContainer = document.createElement("div");
-    const tempStage = new Stage({
-      container: tempContainer,
-      width: CANVAS_WIDTH,
-      height: CANVAS_HEIGHT,
-    });
-
-    const layer = new Konva.Layer({
-      listening: false, // Disable interaction for the thumbnail
-    });
-    tempStage.add(layer);
-
-    // Render scene components
-    for (const component of scene) {
-      if (component.type === "element") {
-        // Create Konva objects based on component data
-      }
-    }
-
-    // Generate thumbnail data URL
-    const dataURL = tempStage.toDataURL({
-      pixelRatio: 0.2, // Lower resolution for thumbnail
-      mimeType: "image/png",
-      width: CANVAS_WIDTH,
-      height: CANVAS_HEIGHT,
-    });
-
-    // Clean up temporary stage
-    tempStage.destroy();
-    tempContainer.remove();
-
-    return dataURL;
-  }, [scene]);
-
-  useEffect(() => {
-    if (scene.length > 0) {
-      const thumbnail = generateThumbnail();
-      setThumbnailUrl(thumbnail);
-    }
-  }, [scene, generateThumbnail]);
 
   return (
     <>
