@@ -4,87 +4,24 @@ import { useEffect, useRef, useState } from "react";
 import { Circle, Transformer } from "react-konva";
 import Konva from "konva";
 import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
+import X from "./X";
+import { DElementProps } from "@/app/editor/_utils/zustand/konva/types";
 
-type Props = CircleConfig & NodeConfig;
+type Props = CircleConfig & NodeConfig & DElementProps;
 
 const XCircle = (props: Props) => {
-  const circleRef = useRef<Konva.Circle>(null);
-  const outlineRef = useRef<Konva.Transformer>(null);
-  const mergeCircleAttrs = useCanvasEditorStore(
-    (state) => state.mergeCircleAttrs
-  );
-
-  const [showOutline, setShowOutline] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-
-  useEffect(() => {
-    // This effect runs once when the component mounts
-    if (circleRef.current && outlineRef.current) {
-      outlineRef.current.nodes([circleRef.current]);
-      outlineRef.current.getLayer()?.batchDraw();
-    }
-  }, []);
-
-  const handleCircleDragMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    setIsDragging(true);
-  };
-  const handleCircleDragEnd = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (circleRef.current) {
-      mergeCircleAttrs(
-        {
-          stageId: props.stageId,
-          componentId: props.componentId,
-          groupId: props.groupId,
-        },
-        {
-          ...e.target.attrs,
-        }
-      );
-    }
-
-    setIsDragging(false);
-  };
-  const handleMouseOver = (e: Konva.KonvaEventObject<MouseEvent>) =>
-    setShowOutline(true);
-  const handleMouseOut = (e: Konva.KonvaEventObject<MouseEvent>) =>
-    setShowOutline(false);
-
-  // Extract position and size props
 
   return (
     <>
       {/* Main circle */}
-      <Circle
-        ref={circleRef}
-        {...props}
-        draggable
-        onMouseOver={handleMouseOver}
-        onMouseEnter={handleMouseOver}
-        onMouseOut={handleMouseOut}
-        onMouseLeave={handleMouseOut}
-        onDragMove={handleCircleDragMove}
-        onDragEnd={handleCircleDragEnd}
-        onTransformEnd={(e) => {
-            mergeCircleAttrs(
-              {
-                stageId: props.stageId,
-                componentId: props.componentId,
-                groupId: props.groupId,
-              },
-              {
-                ...e.target.attrs,
-              }
-            );
-        }}
-      />
+      <X selection={{
+        stageId: props.sceneId!,
+        componentId: props.componentId,
+        groupId: props.groupId,
+      }}>
+        <Circle {...props}/>
+      </X>  
 
-      {/* Outline rectangle - only show when hovering */}
-      <Transformer
-        ref={outlineRef}
-        rotateEnabled={false}
-        enabledAnchors={[]}
-        visible={showOutline || isDragging}
-      />
     </>
   );
 };

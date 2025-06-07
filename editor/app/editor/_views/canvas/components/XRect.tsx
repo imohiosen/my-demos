@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Rect } from "react-konva";
 import Konva from "konva";
 import XOutline from "./XOutline";
-import XWrapper from "./XWrapper";
+import X from "./X";
 
 type Props = RectConfig & NodeConfig;
 
@@ -44,7 +44,7 @@ const XRect = (props: Props) => {
   const { x = 0, y = 0, width = 100, height = 100, ...restProps } = props;
 
   return (
-    <XWrapper 
+    <X 
       ref={groupRef}
       draggable
       onMouseOver={handleMouseOver}
@@ -68,7 +68,7 @@ const XRect = (props: Props) => {
           boundingRect={getBoundingRect()}
           shouldDisplay={showOutline}
         />
-    </XWrapper>
+    </X>
   );
 };
 

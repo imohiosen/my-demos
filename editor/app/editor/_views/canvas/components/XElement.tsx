@@ -6,6 +6,7 @@ import { DElementProps } from "@/app/editor/_utils/zustand/konva/types";
 type Props = DElementProps
 
 const XElement = (props: Props) => {
+  console.log("XElement props: ", props.sceneId);
 
   return (
     props.type === "circle" && <XCircle  {...props} /> ||

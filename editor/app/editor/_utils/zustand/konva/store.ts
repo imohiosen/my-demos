@@ -54,7 +54,7 @@ export interface VideoDraftActions {
     addElement: (component: DComponent) => void;
 
     handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;
-    mergeCircleAttrs: (selection: Selection, attrs: Partial<DElementProps>) => void;
+    mergeAttributes: (selection: Selection, attrs: Partial<DElementProps>) => void;
     getComponentBoundingRect: (selection: Selection) => { x: number; y: number; width: number; height: number; } | null;
     getSceneById: (sceneId: string) => (DComponent)[];
 }

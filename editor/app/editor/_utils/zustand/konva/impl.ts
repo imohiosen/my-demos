@@ -137,7 +137,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               textComp.text.attribute = { ...e?.target?.attrs };
             });
           },
-          mergeCircleAttrs: (
+          mergeAttributes: (
             selection: Selection,
             attrs: Partial<DElementProps>
           ) => {
