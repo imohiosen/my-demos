@@ -79,18 +79,23 @@ type Props = {};
 const CircleButton = () => {
   const addElement = useCanvasEditorStore(state => state.addElement);
   const renderCanvas = usePresenceStore(state => state.renderCanvas);
+  const selectedSceneId = usePresenceStore(state => state.selectedStageId);
 
 
+  if (!selectedSceneId) {
+    return null; // or handle the case when no scene is selected
+  }
   const handleAddElement = () => {
-    
+    const id = `element-circle-${Date.now()}`
     addElement({
-      id: `element-circle-${Date.now()}`,
+      componentId: id,
+      sceneId: selectedSceneId,
       type: "element",
       element: {
         attribute: {
           x: 0, 
           y: 0,
-          radius: 50,
+          radius: 100,
           fill: "black",          
           type: "circle",
         }

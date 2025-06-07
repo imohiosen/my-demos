@@ -69,7 +69,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             future: [],
             maxHistorySize: 100,
           },
-          id: "test-004",
+          id: "test-005",
           addScene: () => {
             set((state) => {
               state.current.scenes[generateId()] = [];
@@ -101,7 +101,8 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
 
               // Create the component directly in the immer draft state
               state.current.scenes[sceneId].push({
-                id: generateId(),
+                componentId: generateId(),
+                sceneId: sceneId,
                 type: "text",
                 text: {
                   attribute: {
@@ -184,10 +185,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
 
           addElement: (component: DComponent) => {
             set((state) => {
-              const sceneId = usePresenceStore.getState().selectedStageId; // Ensure the selected stage ID is set
-              if (!sceneId) {
-                throw new Error(`Error: No stage selected`);
-              }
+              const sceneId = component.sceneId;
               const scene = state.current.scenes[sceneId];
               if (!scene) {
                 throw new Error(
@@ -197,7 +195,8 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
 
               // Create the component directly in the immer draft state
               state.current.scenes[sceneId].push({
-                id: generateId(),
+                componentId: component.componentId,
+                sceneId: sceneId,
                 type: "element",
                 element: {
                   attribute: {
@@ -327,7 +326,7 @@ function getComponentFromSelectedScene(
   const selectedScene = usePresenceStore.getState().selectedStageId;
   if (!selectedScene) throw new Error(`No scene selected`);
   const comp = state.current.scenes[selectedScene].find(
-    (c) => c.id === selection.componentId
+    (c) => c.componentId === selection.componentId
   ) as DComponent;
   if (!comp) {
     throw new Error(

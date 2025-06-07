@@ -31,7 +31,6 @@ const PlaybackScene = ({
 
   useEffect(() => {
     if (ref.current && isSelected) {
-      console.log("PlaybackScene focused:", ref.current);
       ref.current.focus();
     }
   }, [ref, isSelected, sceneId]);

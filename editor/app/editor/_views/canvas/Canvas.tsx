@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";;
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Layer, Rect, Stage } from "react-konva";
+import { Circle, Layer, Stage } from "react-konva";
 import Konva from "konva";
 import {
   useCanvasEditorStore,
@@ -10,10 +10,10 @@ import {
 import throttle from "lodash/throttle";
 import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import XElement from "./components/XElement";
 import CanvasBackground from "./components/CanvasBackground";
 import XSelect from "./components/XSelect";
 import SelectionRectangle from "./components/SelectionRectangle";
+import X$ from "./components/X";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -63,7 +63,7 @@ const Canvas = (props: Props) => {
   usePresenceStore((state) => state.liveblocks.isStorageLoading);
   usePresenceStore((state) => state.stageScale);
   usePresenceStore((state) => state.stageViewBox);
-  usePresenceStore((state) => state.renderCount);
+  const r = usePresenceStore((state) => state.renderCount);
 
   const updateStageScale = usePresenceStore((state) => state.updateStageScale);
   const updateStageViewBox = usePresenceStore(
@@ -80,12 +80,11 @@ const Canvas = (props: Props) => {
 
   useEffect(() => {
     setSelectedIds([]);
-  }
-  , [selectedSceneId]);
+  }, [selectedSceneId]);
 
   const handleStageClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // If we are selecting with rect, do nothing
-    
+
     if (selectionRectangle.visible) {
       return;
     }
@@ -349,9 +348,9 @@ const Canvas = (props: Props) => {
 
     const selected = selectedScene.filter((compAttrs) => {
       // Check if rectangle intersects with selection box
-      const compNode = stageRef.current?.findOne(`#${compAttrs.id}`);
+      const compNode = stageRef.current?.findOne(`#${compAttrs.componentId}`);
       if (!compNode) {
-        console.warn(`Component with id ${compAttrs.id} not found`);
+        console.warn(`Component with id ${compAttrs.componentId} not found`);
         return false;
       }
 
@@ -366,8 +365,7 @@ const Canvas = (props: Props) => {
       }
     });
 
-    setSelectedIds(selected.map((rect) => rect.id));
-
+    setSelectedIds(selected.map((comp) => comp.componentId));
 
     // Update visibility in timeout, so we can check it in click event
     setTimeout(() => {
@@ -441,17 +439,30 @@ const Canvas = (props: Props) => {
                   console.error("Group not implemented:");
                   return null;
                 } else if (component.type === "element") {
-                  return (
-                    component.element && (
-                      <XElement
-                        key={component.id}
-                        id={component.id}
-                        {...component.element.attribute}
-                        componentId={component.id}
-                        sceneId={selectedSceneId}
-                      />
-                    )
-                  );
+                  if (!component.element) {
+                    console.error(
+                      "Element is not defined for component: ",
+                      component.componentId
+                    );
+                    return null;
+                  }
+                  const elem = component.element.attribute;
+                  if (elem.type === "circle") {
+                    return (
+                      <X$ key={component.componentId} selection={{
+                        sceneId: component.sceneId!,
+                        componentId: component.componentId,
+                      }}>
+                        <Circle {...elem} id={component.componentId} />
+                      </X$>
+                    );
+                  } else {
+                    console.error(
+                      "Unsupported element type: ",
+                      component.element.attribute.type
+                    );
+                    return null;
+                  }
                 } else if (component.type === "text") {
                   console.error(
                     "Text components are not yet implemented in Canvas"

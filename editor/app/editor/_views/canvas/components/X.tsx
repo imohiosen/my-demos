@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Circle, Transformer } from "react-konva";
+import { Transformer } from "react-konva";
 import Konva from "konva";
 import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
 import React from "react";
 import { Selection } from "@/app/editor/_utils/zustand/konva/types";
 
-type XNode = (Konva.Circle | Konva.Rect | Konva.Group) & Konva.Node ;
 
 type Props =  {children: React.ReactNode; selection: Selection}
 
-const X = (props: Props) => {
+const X$ = (props: Props) => {
   const nodeRef = useRef<Konva.Node>(null);
   const outlineRef = useRef<Konva.Transformer>(null);
   const mergeAttributes = useCanvasEditorStore(
@@ -18,14 +17,13 @@ const X = (props: Props) => {
 
   const [showOutline, setShowOutline] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-
   useEffect(() => {
-    // This effect runs once when the component mounts
+
     if (nodeRef.current && outlineRef.current) {
       outlineRef.current.nodes([nodeRef.current]);
       outlineRef.current.getLayer()?.batchDraw();
     }
-  }, [nodeRef, outlineRef]);
+  }, [nodeRef, outlineRef, props.children]);
 
   const handleDragMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
     setIsDragging(true);
@@ -57,11 +55,9 @@ const X = (props: Props) => {
   const handleMouseOut = (e: Konva.KonvaEventObject<MouseEvent>) =>
     setShowOutline(false);
 
-  // Extract position and size props
 
   return (
     <>
-      {/* Main circle */}
       {React.cloneElement(props.children as React.ReactElement<any>, {
         ...props.selection,
         ref: nodeRef,
@@ -84,4 +80,4 @@ const X = (props: Props) => {
   );
 };
 
-export default X;
+export default X$;

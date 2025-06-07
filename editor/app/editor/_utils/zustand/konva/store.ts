@@ -15,7 +15,6 @@ export type VideoDraftState = {
         maxHistorySize: number;
     };
 }
-
 export type Presence = {
     cursorPosition: Point; // Current cursor position
     selectedItems?: Selection[]; // Array of selected items
