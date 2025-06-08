@@ -15,6 +15,7 @@ import XSelect from "./components/XSelect";
 import XSelectionRectangle from "./components/SelectionRectangle";
 import XComponent from "./components/XComponent";
 import { SelectionRectangle } from "../../_utils/zustand/konva/types";
+import { useStageClickHandler } from "../../_hooks/useStageClickHandler";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -73,49 +74,12 @@ const Canvas = (props: Props) => {
   const getSceneById = useCanvasEditorStore((s) => s.getSceneById);
   const selectedScene = getSceneById(selectedSceneId!);
 
+  // Use the custom hook for stage click handling
+  const { handleStageClick } = useStageClickHandler({ selectionRectangle });
+
   useEffect(() => {
     updateSelectedIds([]);
   }, [selectedSceneId, updateSelectedIds]);
-
-  const handleStageClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    // If we are selecting with rect, do nothing
-
-    if (e.evt.button === 2) {
-      // Right click, do nothing
-      console.log("Right click detected, ignoring stage click event");
-      e.evt.preventDefault();
-      e.evt.stopPropagation();
-      return;
-    }
-
-    if (selectionRectangle.visible) {
-      return;
-    }
-
-    if (e.target === e.target.getStage()) {
-      updateSelectedIds([]);
-      return;
-    }
-
-    const clickedId = e.target.id();
-
-    // Do we pressed shift or ctrl?
-    const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
-    const isSelected = selectedIds.includes(clickedId);
-
-    if (!metaPressed && !isSelected) {
-      // If no key pressed and the node is not selected
-      // select just one
-      updateSelectedIds([clickedId]);
-    } else if (metaPressed && isSelected) {
-      // If we pressed keys and node was selected
-      // we need to remove it from selection
-      updateSelectedIds(selectedIds.filter((id) => id !== clickedId));
-    } else if (metaPressed && !isSelected) {
-      // Add the node into selection
-      updateSelectedIds([...selectedIds, clickedId]);
-    }
-  };
 
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // Do nothing if we mousedown on any shape
