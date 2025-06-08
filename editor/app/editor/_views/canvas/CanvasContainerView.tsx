@@ -1,7 +1,7 @@
 import CanvasHeaderCtrl from "./CanvasHeaderCtrl";
 import { Button } from "@/components/ui/button";
 import { RectangleHorizontal, RectangleVertical } from "lucide-react";
-import Canvas from "./Canvas";
+import Canvas from "./CanvasContentView";
 import UndoRedoCtrl from "./UndoRedoCtrl";
 import CanvasSelectionCtrl from "../../_components/edit-pane/CanvasSelectionCtrl";
 

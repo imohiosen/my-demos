@@ -1,14 +1,14 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Navbar from "./_views/navbar/Navbar";
-import Playback from "./_views/playback/Playback";
-import Transcript from "./_views/transcript/Transcript";
+import Navbar from "./_views/navbar/NavbarView";
+import Playback from "./_views/playback/PlaybackView";
+import Transcript from "./_views/transcript/TranscriptView";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import CanvasView from "./_views/canvas/CanvasView";
-import CanvasContextMenu from "./_components/context-menus/CanvasContextMenu";
+import CanvasView from "./_views/canvas/CanvasContainerView";
+import CanvasContextMenu from "./_components/context-menus/ContextMenuView";
 
 export default function Page() {
   
