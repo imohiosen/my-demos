@@ -31,7 +31,7 @@ import { useSceneSelectionManager } from "../../_hooks/useSceneSelectionManager"
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
 
-const initSelectionRectangle: SelectionRectangle = {
+const selRect: SelectionRectangle = {
   visible: false,
   x1: 0,
   y1: 0,
@@ -49,9 +49,7 @@ const CanvasContentView = (props: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
 
-  const [selectionRectangle, setSelectionRectangle] = useState(
-    initSelectionRectangle
-  );
+  const [selectionRectangle, setSelectionRectangle] = useState(selRect);
 
   const draftId = useCanvasEditorStore((state) => state.id);
   const updateStageViewBox = usePresenceStore((s) => s.updateStageViewBox);
