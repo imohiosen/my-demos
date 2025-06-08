@@ -1,7 +1,7 @@
 import CanvasHeaderCtrl from "./CanvasHeaderCtrl";
 import { Button } from "@/components/ui/button";
 import { RectangleHorizontal, RectangleVertical } from "lucide-react";
-import Canvas from "./CanvasContentView";
+import CanvasView from "./CanvasContentView";
 import UndoRedoCtrl from "./UndoRedoCtrl";
 import CanvasSelectionCtrl from "../../_components/edit-pane/CanvasSelectionCtrl";
 
@@ -27,7 +27,7 @@ const CanvasView = (props: Props) => {
         </div>
       </div>
       <div className="h-full overflow-hidden flex flex-col gap-2 justify-center items-center bg-transparent">
-        <Canvas />
+        <CanvasView />
       </div>
     </div>
   );

@@ -37,8 +37,6 @@ const CANVAS_HEIGHT = 1080;
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
 
-const THROTTLE_DELAY = 200; // Adjust as needed for performance
-
 const initSelectionRectangle: SelectionRectangle = {
   visible: false,
   x1: 0,
@@ -47,7 +45,8 @@ const initSelectionRectangle: SelectionRectangle = {
   y2: 0,
 };
 
-const Canvas = (props: Props) => {
+const CanvasView = (props: Props) => {
+  
   usePresenceStore((s) => s.liveblocks.isStorageLoading);
   usePresenceStore((s) => s.stageScale);
   usePresenceStore((s) => s.renderCount);
@@ -62,46 +61,23 @@ const Canvas = (props: Props) => {
   const draftId = useCanvasEditorStore((state) => state.id);
   const enterPresenceRoom = usePresenceStore((s) => s.liveblocks.enterRoom);
   const leavePresenceRoom = usePresenceStore((s) => s.liveblocks.leaveRoom);
-  const updateCursorPosition = usePresenceStore((s) => s.updateCursorPosition);
-  const updateStagePosition = usePresenceStore((s) => s.updateStagePosition);
-  const updateStageScale = usePresenceStore((s) => s.updateStageScale);
   const updateStageViewBox = usePresenceStore((s) => s.updateStageViewBox);
   const selectedSceneId = usePresenceStore((s) => s.selectedStageId);
   const selectedIds = usePresenceStore((s) => s.selectedIds);
-  const isSelecting = usePresenceStore((s) => s.isSelecting);
   const updateSelectedIds = usePresenceStore((s) => s.updateSelectedIds);
-  const updateIsSelecting = usePresenceStore((s) => s.updateIsSelecting);
 
   const enterRoom = useCanvasEditorStore((s) => s.liveblocks.enterRoom);
   const leaveRoom = useCanvasEditorStore((s) => s.liveblocks.leaveRoom);
   const getSceneById = useCanvasEditorStore((s) => s.getSceneById);
   const selectedScene = getSceneById(selectedSceneId!);
-
-  // Use the custom hook for stage click handling
   const { handleStageClick } = useStageClickHandler({ selectionRectangle });
-  
-  // Use the custom hook for mouse down handling
   const { handleMouseDown } = useMouseDownHandler({ setSelectionRectangle });
-  
-  // Use the custom hook for wheel handling
   const { handleWheel } = useWheelHandler({ stageRef });
-  
-  // Use the custom hook for center handling
   const { handleCenter } = useCenterHandler({ stageRef, containerRef });
-  
-  // Use the custom hook for context menu handling
   const { handleContextMenu } = useContextMenuHandler({ selectionRectangle, setSelectionRectangle });
-  
-  // Use the custom hook for drag handling
   const { handleDrag } = useDragHandler({ stageRef, containerRef });
-  
-  // Use the custom hook for mouse move handling
   const { handleMouseMove } = useMouseMoveHandler({ containerRef, selectionRectangle, setSelectionRectangle });
-  
-  // Use the custom hook for mouse up handling
   const { handleMouseUp } = useMouseUpHandler({ stageRef, selectionRectangle, setSelectionRectangle, selectedSceneId: selectedSceneId! });
-
-  // Use the custom hook for export image handling
   const { handleExportImage } = useExportImageHandler({ stageRef });
 
   useEffect(() => {
@@ -227,4 +203,4 @@ const Canvas = (props: Props) => {
   );
 };
 
-export default Canvas;
+export default CanvasView;
