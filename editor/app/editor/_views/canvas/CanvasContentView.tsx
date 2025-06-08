@@ -155,11 +155,6 @@ const Canvas = (props: Props) => {
     });
   };
 
-  const throttledUpdateCursorPosition = updateCursorPosition;
-  const throttledUpdateStagePosition = updateStagePosition;
-  const throttledUpdateStageScale = updateStageScale;
-  const throttledUpdateStageViewBox = updateStageViewBox;
-
   useEffect(() => {
     enterPresenceRoom("presence/" + draftId);
     enterRoom("storage/" + draftId);
@@ -172,7 +167,7 @@ const Canvas = (props: Props) => {
   useEffect(() => {
     const updateViewport = () => {
       if (containerRef.current) {
-        throttledUpdateStageViewBox({
+        updateStageViewBox({
           x: containerRef.current.clientWidth,
           y: containerRef.current.clientHeight,
         });
@@ -183,7 +178,7 @@ const Canvas = (props: Props) => {
 
     window.addEventListener("resize", updateViewport);
     return () => window.removeEventListener("resize", updateViewport);
-  }, [throttledUpdateStageViewBox]);
+  }, [updateStageViewBox]);
 
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
@@ -216,8 +211,8 @@ const Canvas = (props: Props) => {
     };
 
     stage.position(newPos);
-    throttledUpdateStagePosition(newPos);
-    throttledUpdateStageScale({
+    updateStagePosition(newPos);
+    updateStageScale({
       x: newScale,
       y: newScale,
     });
@@ -240,11 +235,11 @@ const Canvas = (props: Props) => {
       y: container.clientHeight / 2,
     });
 
-    throttledUpdateStagePosition({
+    updateStagePosition({
       x: container.clientWidth / 2,
       y: container.clientHeight / 2,
     });
-    throttledUpdateStageScale({
+    updateStageScale({
       x: fitScale,
       y: fitScale,
     });
@@ -305,11 +300,11 @@ const Canvas = (props: Props) => {
     const container = containerRef.current;
 
     const pos = stage.getPosition();
-    throttledUpdateStagePosition(pos);
+    updateStagePosition(pos);
   };
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    throttledUpdateCursorPosition({
+    updateCursorPosition({
       x: e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
       y: e.evt.clientY - containerRef.current!.getBoundingClientRect().top,
     });
