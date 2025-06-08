@@ -1,13 +1,14 @@
 "use client";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useCanvasStore } from "../../_utils/zustand/canvas/canvasStore";
 import { CanvasEventData } from "../../_utils/canvas/ho-types";
 import { Card } from "@/components/ui/card";
+import { usePresenceStore } from "../../_utils/zustand/konva/impl";
 
 type Props = {};
 
 const CanvasContextMenu = ({}: Props) => {
-  const selectedObjects = useCanvasStore((state) => state.present.selectedObjects);
+  const updateSelectedItems = usePresenceStore(s => s.updateSelectedItems)
   
   const [objectType, setObjectType] = useState<string>("canvas");
   const [isVisible, setIsVisible] = useState(false);
@@ -17,30 +18,15 @@ const CanvasContextMenu = ({}: Props) => {
 
   // Extract event handlers for better readability
   const handleCanvasContextMenu = useCallback((e: CustomEvent) => {
+    console.log("CanvasContextMenuEvent triggered", e);
     const canvasEventData = e.detail as CanvasEventData | null;
 
-    // first select canvas object under the cursor/pointer
-    if (canvasEventData && canvasEventData.target && canvasEventData.target.canvas) {
-      // Select the object using Fabric.js API
-      const canvas = canvasEventData.target.canvas;
-      if (canvas) {
-        // Set the active object on the canvas
-        canvas.setActiveObject(canvasEventData.target);
-        canvas.renderAll();
-        // Update the store with the selected object
-      } else {
-        console.error("Canvas not found in context menu event data...");
-      }
-    }
-
-    console.log("CanvasContextMenuEvent triggered", canvasEventData);
-    
     if (!canvasEventData) {
       console.warn("No target found for context menu event");
       return;
     }
 
-    const { clientX, clientY } = canvasEventData.e.e;
+    const { clientX, clientY } = canvasEventData
     
     setPosition({ x: clientX, y: clientY });
     setIsVisible(true);
@@ -103,14 +89,6 @@ const CanvasContextMenu = ({}: Props) => {
   }, [handleCanvasContextMenu, handleClickOutside, handleRightClickOutside]);
 
   // Update object type based on selected objects
-  useEffect(() => {
-    if (selectedObjects && selectedObjects.length > 0) {
-      // Determine object type based on selection
-      setObjectType("object");
-    } else {
-      setObjectType("canvas");
-    }
-  }, [selectedObjects]);
 
   const renderContextMenu = () => {
     if (!isVisible) return null;
@@ -120,6 +98,7 @@ const CanvasContextMenu = ({}: Props) => {
     return (
       <div 
         ref={contextMenuRef}
+        onContextMenu={(e) => e.preventDefault()} // Prevent default context menu
         style={{ 
           position: 'fixed', 
           top: position.y, 

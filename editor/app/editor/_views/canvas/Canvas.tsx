@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";;
+"use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import Konva from "konva";
@@ -84,6 +84,14 @@ const Canvas = (props: Props) => {
   const handleStageClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // If we are selecting with rect, do nothing
 
+    if (e.evt.button === 2) {
+      // Right click, do nothing
+      console.log("Right click detected, ignoring stage click event");
+      e.evt.preventDefault();
+      e.evt.stopPropagation();
+      return;
+    }
+
     if (selectionRectangle.visible) {
       return;
     }
@@ -116,6 +124,15 @@ const Canvas = (props: Props) => {
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // Do nothing if we mousedown on any shape
     if (e.target !== e.target.getStage()) {
+      return;
+    }
+
+    // if context menu mouse down, do nothing
+    if (e.evt.button === 2) {
+      // Right click, do nothing
+      console.log("Right click detected, ignoring mouse down event");
+      e.evt.preventDefault();
+      e.evt.stopPropagation();
       return;
     }
 
@@ -224,8 +241,6 @@ const Canvas = (props: Props) => {
         ? oldScale * ZOOM_SCALE_FACTOR
         : oldScale / ZOOM_SCALE_FACTOR;
 
-        
-
     newScale = Math.max(MIN_ZOOM_RATIO, Math.min(MAX_ZOOM_RATIO, newScale));
 
     stage.scale({ x: newScale, y: newScale });
@@ -262,6 +277,24 @@ const Canvas = (props: Props) => {
       container.clientHeight / 2
     );
     throttledUpdateStageScale(fitScale, fitScale);
+  };
+
+  const handleContextMenu = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    e.evt.preventDefault();
+    e.evt.stopPropagation();
+
+    setSelectionRectangle((prev) => ({
+      ...prev,
+      visible: false,
+    }));
+
+    const contextMenuEvent = new CustomEvent("X:CanvasContextMenuEvent", {
+      detail: {
+        clientX: e.evt.clientX,
+        clientY: e.evt.clientY,
+      },
+    });
+    document.dispatchEvent(contextMenuEvent);
   };
 
   const handleExportImage = () => {
@@ -333,8 +366,16 @@ const Canvas = (props: Props) => {
       y2: pos.y,
     }));
   };
-  const handleMouseUp = () => {
+  const handleMouseUp = (e) => {
     // Do nothing if we didn't start selection
+    if (e.evt.button === 2) {
+      // Right click, do nothing
+      console.log("Right click detected, ignoring mouse up event");
+      e.evt.preventDefault();
+      e.evt.stopPropagation();
+      return;
+    }
+
     if (!isSelecting.current) {
       return;
     }
@@ -374,7 +415,7 @@ const Canvas = (props: Props) => {
         ...prev,
         visible: false,
       }));
-    }, 0);
+    }, 10);
   };
 
   const getInitialScale = () => {
@@ -428,6 +469,7 @@ const Canvas = (props: Props) => {
           onMouseDown={handleMouseDown}
           onMouseup={handleMouseUp}
           onClick={handleStageClick}
+          onContextMenu={handleContextMenu}
         >
           {/* Background and overlay layer */}
           <Layer listening={false}>
