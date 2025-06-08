@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import Konva from "konva";
 import {
@@ -39,7 +39,7 @@ const initSelectionRectangle: SelectionRectangle = {
   y2: 0,
 };
 
-const CanvasView = (props: Props) => {
+const CanvasContentView = (props: Props) => {
   usePresenceStore((s) => s.liveblocks.isStorageLoading);
   usePresenceStore((s) => s.stageScale);
   usePresenceStore((s) => s.renderCount);
@@ -184,4 +184,4 @@ const CanvasView = (props: Props) => {
   );
 };
 
-export default CanvasView;
+export default CanvasContentView;

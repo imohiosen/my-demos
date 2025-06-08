@@ -7,7 +7,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import CanvasView from "./_views/canvas/CanvasContainerView";
+import CanvasContentView from "./_views/canvas/CanvasContainerView";
 import CanvasContextMenu from "./_components/context-menus/ContextMenuView";
 
 export default function Page() {
@@ -30,7 +30,7 @@ export default function Page() {
           <ResizablePanel defaultSize={70} minSize={30} >
             <div  className="h-full space-y-1 flex flex-col overflow-x-hidden overflow-y-hidden">
               <div  className=" flex-1 overflow-hidden">
-                <CanvasView />
+                <CanvasContentView />
               </div>
                 <div className="h-[160px] m-0 p-0 "> 
                 <Playback />
