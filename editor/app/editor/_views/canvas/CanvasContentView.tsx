@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+"use client";;
+import { useEffect, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import Konva from "konva";
 import {
   useCanvasEditorStore,
   usePresenceStore,
 } from "../../_utils/zustand/konva/impl";
-import throttle from "lodash/throttle";
 import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CanvasBackground from "./components/CanvasBackground";
@@ -16,14 +15,18 @@ import XSelectionRectangle from "./components/SelectionRectangle";
 import XComponent from "./components/XComponent";
 import { SelectionRectangle } from "../../_utils/zustand/konva/types";
 import { useStageClickHandler } from "../../_hooks/useStageClickHandler";
+import { useMouseDownHandler } from "../../_hooks/useMouseDownHandler";
+import { useWheelHandler } from "../../_hooks/useWheelHandler";
+import { useCenterHandler } from "../../_hooks/useCenterHandler";
+import { useContextMenuHandler } from "../../_hooks/useContextMenuHandler";
+import { useDragHandler } from "../../_hooks/useDragHandler";
+import { useMouseMoveHandler } from "../../_hooks/useMouseMoveHandler";
+import { useMouseUpHandler } from "../../_hooks/useMouseUpHandler";
+import { useExportImageHandler } from "../../_hooks/useExportImageHandler";
 
-// Constants
-const MAX_ZOOM_RATIO = 10;
-const MIN_ZOOM_RATIO = 0.1;
+// Constants for initial scale calculation
 const CANVAS_WIDTH = 1920;
 const CANVAS_HEIGHT = 1080;
-const ZOOM_SCALE_FACTOR = 1.1;
-const OVERLAY_MULTIPLIER = 5;
 
 // TODO
 // Group Items
@@ -76,49 +79,34 @@ const Canvas = (props: Props) => {
 
   // Use the custom hook for stage click handling
   const { handleStageClick } = useStageClickHandler({ selectionRectangle });
+  
+  // Use the custom hook for mouse down handling
+  const { handleMouseDown } = useMouseDownHandler({ setSelectionRectangle });
+  
+  // Use the custom hook for wheel handling
+  const { handleWheel } = useWheelHandler({ stageRef });
+  
+  // Use the custom hook for center handling
+  const { handleCenter } = useCenterHandler({ stageRef, containerRef });
+  
+  // Use the custom hook for context menu handling
+  const { handleContextMenu } = useContextMenuHandler({ selectionRectangle, setSelectionRectangle });
+  
+  // Use the custom hook for drag handling
+  const { handleDrag } = useDragHandler({ stageRef, containerRef });
+  
+  // Use the custom hook for mouse move handling
+  const { handleMouseMove } = useMouseMoveHandler({ containerRef, selectionRectangle, setSelectionRectangle });
+  
+  // Use the custom hook for mouse up handling
+  const { handleMouseUp } = useMouseUpHandler({ stageRef, selectionRectangle, setSelectionRectangle, selectedSceneId: selectedSceneId! });
+
+  // Use the custom hook for export image handling
+  const { handleExportImage } = useExportImageHandler({ stageRef });
 
   useEffect(() => {
     updateSelectedIds([]);
   }, [selectedSceneId, updateSelectedIds]);
-
-  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    // Do nothing if we mousedown on any shape
-    if (e.target !== e.target.getStage()) {
-      return;
-    }
-
-    // if context menu mouse down, do nothing
-    if (e.evt.button === 2) {
-      // Right click, do nothing
-      console.log("Right click detected, ignoring mouse down event");
-      e.evt.preventDefault();
-      e.evt.stopPropagation();
-      return;
-    }
-
-    // Start selection rectangle
-    updateIsSelecting(true);
-    const stage = e.target.getStage();
-    if (!stage) {
-      console.error("Stage is not defined in handleMouseDown");
-      return;
-    }
-
-    // Get relative position to stage (accounting for zoom and pan)
-    const pos = stage.getRelativePointerPosition();
-    if (!pos) {
-      console.error("Pointer position is null");
-      return;
-    }
-
-    setSelectionRectangle({
-      visible: true,
-      x1: pos.x,
-      y1: pos.y,
-      x2: pos.x,
-      y2: pos.y,
-    });
-  };
 
   useEffect(() => {
     enterPresenceRoom("presence/" + draftId);
@@ -144,210 +132,6 @@ const Canvas = (props: Props) => {
     window.addEventListener("resize", updateViewport);
     return () => window.removeEventListener("resize", updateViewport);
   }, [updateStageViewBox]);
-
-  const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
-    e.evt.preventDefault();
-
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    const oldScale = stage.scaleX();
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
-
-    const mousePointTo = {
-      x: (pointer.x - stage.x()) / oldScale,
-      y: (pointer.y - stage.y()) / oldScale,
-    };
-
-    const direction = e.evt.deltaY > 0 ? -1 : 1;
-    let newScale =
-      direction > 0
-        ? oldScale * ZOOM_SCALE_FACTOR
-        : oldScale / ZOOM_SCALE_FACTOR;
-
-    newScale = Math.max(MIN_ZOOM_RATIO, Math.min(MAX_ZOOM_RATIO, newScale));
-
-    stage.scale({ x: newScale, y: newScale });
-
-    const newPos = {
-      x: pointer.x - mousePointTo.x * newScale,
-      y: pointer.y - mousePointTo.y * newScale,
-    };
-
-    stage.position(newPos);
-    updateStagePosition(newPos);
-    updateStageScale({
-      x: newScale,
-      y: newScale,
-    });
-  };
-
-  const handleCenter = () => {
-    const stage = stageRef.current;
-    if (!stage || !containerRef.current) return;
-
-    const container = containerRef.current;
-    const fitScale = Math.min(
-      container.clientWidth / CANVAS_WIDTH,
-      container.clientHeight / CANVAS_HEIGHT
-    );
-
-    stage.scale({ x: fitScale, y: fitScale });
-
-    stage.position({
-      x: container.clientWidth / 2,
-      y: container.clientHeight / 2,
-    });
-
-    updateStagePosition({
-      x: container.clientWidth / 2,
-      y: container.clientHeight / 2,
-    });
-    updateStageScale({
-      x: fitScale,
-      y: fitScale,
-    });
-  };
-
-  const handleContextMenu = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    e.evt.preventDefault();
-    e.evt.stopPropagation();
-
-    setSelectionRectangle({
-      ...selectionRectangle,
-      visible: false,
-    });
-
-    const contextMenuEvent = new CustomEvent("X:CanvasContextMenuEvent", {
-      detail: {
-        clientX: e.evt.clientX,
-        clientY: e.evt.clientY,
-      },
-    });
-    document.dispatchEvent(contextMenuEvent);
-  };
-
-  const handleExportImage = () => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    // Get the current stage position and scale to calculate the canvas area
-    const stagePosition = stage.position();
-    const stageScale = stage.scaleX();
-
-    // Calculate the actual canvas position in screen coordinates
-    const canvasScreenX = stagePosition.x - (CANVAS_WIDTH / 2) * stageScale;
-    const canvasScreenY = stagePosition.y - (CANVAS_HEIGHT / 2) * stageScale;
-
-    const dataURL = stage.toDataURL({
-      pixelRatio: 2, // Higher quality
-      mimeType: "image/png",
-      x: canvasScreenX,
-      y: canvasScreenY,
-      width: CANVAS_WIDTH * stageScale,
-      height: CANVAS_HEIGHT * stageScale,
-    });
-
-    console.log("Exporting canvas background area with data URL:", dataURL);
-
-    const link = document.createElement("a");
-    link.download = "canvas-export.png";
-    link.href = dataURL;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDrag = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    const stage = stageRef.current;
-    if (!stage || !containerRef.current) return;
-    const container = containerRef.current;
-
-    const pos = stage.getPosition();
-    updateStagePosition(pos);
-  };
-
-  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    updateCursorPosition({
-      x: e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
-      y: e.evt.clientY - containerRef.current!.getBoundingClientRect().top,
-    });
-
-    // Do nothing if we didn't start selection
-    if (!isSelecting) {
-      return;
-    }
-    const stage = e.target.getStage();
-    if (!stage) {
-      console.error("Stage is not defined in handleMouseMove");
-      return;
-    }
-
-    // Get relative position to stage (accounting for zoom and pan)
-    const pos = stage.getRelativePointerPosition();
-    if (!pos) {
-      console.error("Pointer position is null in handleMouseMove");
-      return;
-    }
-
-    setSelectionRectangle({
-      ...selectionRectangle,
-      x2: pos.x,
-      y2: pos.y,
-    });
-  };
-  const handleMouseUp = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    // Do nothing if we didn't start selection
-    if (e.evt.button === 2) {
-      // Right click, do nothing
-      console.log("Right click detected, ignoring mouse up event");
-      e.evt.preventDefault();
-      e.evt.stopPropagation();
-      return;
-    }
-
-    if (!isSelecting) {
-      return;
-    }
-    updateIsSelecting(false);
-
-    const selBox = {
-      x: Math.min(selectionRectangle.x1, selectionRectangle.x2),
-      y: Math.min(selectionRectangle.y1, selectionRectangle.y2),
-      width: Math.abs(selectionRectangle.x2 - selectionRectangle.x1),
-      height: Math.abs(selectionRectangle.y2 - selectionRectangle.y1),
-    };
-
-    const selected = selectedScene.filter((compAttrs) => {
-      // Check if rectangle intersects with selection box
-      const compNode = stageRef.current?.findOne(`#${compAttrs.componentId}`);
-      if (!compNode) {
-        console.warn(`Component with id ${compAttrs.componentId} not found`);
-        return false;
-      }
-
-      if (stageRef.current) {
-        const compBox = compNode.getClientRect({
-          relativeTo: stageRef.current,
-        });
-        return Konva.Util.haveIntersection(selBox, compBox);
-      } else {
-        console.error("Stage reference is not defined in handleMouseUp");
-        return false;
-      }
-    });
-
-    updateSelectedIds(selected.map((comp) => comp.componentId));
-
-    // Update visibility in timeout, so we can check it in click event
-    setTimeout(() => {
-      setSelectionRectangle({
-        ...selectionRectangle,
-        visible: false,
-      });
-    }, 100);
-  };
 
   const getInitialScale = () => {
     if (!containerRef.current) return 1;
