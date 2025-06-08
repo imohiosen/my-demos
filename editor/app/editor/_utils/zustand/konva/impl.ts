@@ -17,6 +17,7 @@ import { createClient } from "@liveblocks/client";
 import Konva from "konva";
 import { WritableDraft } from "immer";
 import { DComponent, DElementProps, DGroup, Point, Selection, SelectionRectangle } from "./types";
+import throttle from 'lodash/throttle';
 
 type State = VideoDraftState;
 type Actions = VideoDraftActions;
@@ -233,6 +234,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
     }
   )
 );
+const THROTTLE_DELAY = 200; // Adjust as needed for performance
 
 const init = (set, get) => ({
   cursorPosition: { x: 0, y: 0 },
@@ -242,31 +244,31 @@ const init = (set, get) => ({
   stageViewBox: { x: 0, y: 0 },
   renderCount: 0,
   selectedStageId: null, // Initially no stage is selected
-  updateCursorPosition: (position: Point) => {
+  updateCursorPosition: throttle((position: Point) => {
     set((state: Presence) => {
       state.cursorPosition = position;
     });
-  }, // Update cursor position
+  }, THROTTLE_DELAY), // Update cursor position with throttling (60fps)
   updateSelectedItems: (items: Selection[]) => {
     set((state: Presence) => {
       state.selectedItems = items;
     });
-  }, // Update selected items
-  updateStagePosition: (position: Point) => {
+  },
+  updateStagePosition: throttle((position: Point) => {
     set((state: Presence) => {
       state.stagePosition = position;
-    }); // Update stage position
-  },
-  updateStageViewBox: (viewBox: Point) => {
+    });
+  }, THROTTLE_DELAY), // Update stage position with throttling
+  updateStageViewBox: throttle((viewBox: Point) => {
     set((state: Presence) => {
       state.stageViewBox = viewBox;
-    }); // Update stage view box
-  },
-  updateStageScale: (scale: Point) => {
+    });
+  }, THROTTLE_DELAY), // Update stage view box with throttling
+  updateStageScale: throttle((scale: Point) => {
     set((state: Presence) => {
       state.stageScale = scale;
-    }); // Update stage scale
-  },
+    });
+  }, THROTTLE_DELAY), // Update stage scale with throttling
   updateSelectedStageId: (sceneId: string) => {
     set((state: Presence) => {
       state.selectedStageId = sceneId;

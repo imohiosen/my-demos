@@ -36,12 +36,12 @@ type Props = {};
 const THROTTLE_DELAY = 200; // Adjust as needed for performance
 
 const initSelectionRectangle = {
-      visible: false,
-      x1: 0,
-      y1: 0,
-      x2: 0,
-      y2: 0,
-    };
+  visible: false,
+  x1: 0,
+  y1: 0,
+  x2: 0,
+  y2: 0,
+};
 
 const Canvas = (props: Props) => {
   usePresenceStore((s) => s.liveblocks.isStorageLoading);
@@ -53,7 +53,9 @@ const Canvas = (props: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
 
-  const [selectionRectangle, setSelectionRectangle] =  useState<SelectionRectangle>(initSelectionRectangle);
+  const [selectionRectangle, setSelectionRectangle] =
+    useState<SelectionRectangle>(initSelectionRectangle);
+  const draftId = useCanvasEditorStore((state) => state.id);
 
   const enterPresenceRoom = usePresenceStore((s) => s.liveblocks.enterRoom);
   const leavePresenceRoom = usePresenceStore((s) => s.liveblocks.leaveRoom);
@@ -153,40 +155,10 @@ const Canvas = (props: Props) => {
     });
   };
 
-  // Create throttled functions once, not on every call
-  const throttledUpdateCursorPosition = useCallback(
-    throttle(
-      (x: number, y: number) => updateCursorPosition({ x, y }),
-      THROTTLE_DELAY
-    ),
-    [updateCursorPosition]
-  );
-
-  const throttledUpdateStagePosition = useCallback(
-    throttle(
-      (x: number, y: number) => updateStagePosition({ x, y }),
-      THROTTLE_DELAY
-    ),
-    [updateStagePosition]
-  );
-
-  const throttledUpdateStageScale = useCallback(
-    throttle(
-      (x: number, y: number) => updateStageScale({ x, y }),
-      THROTTLE_DELAY
-    ),
-    [updateStageScale]
-  );
-
-  const throttledUpdateStageViewBox = useCallback(
-    throttle(
-      (x: number, y: number) => updateStageViewBox({ x, y }),
-      THROTTLE_DELAY
-    ),
-    [updateStageViewBox]
-  );
-
-  const draftId = useCanvasEditorStore((state) => state.id);
+  const throttledUpdateCursorPosition = updateCursorPosition;
+  const throttledUpdateStagePosition = updateStagePosition;
+  const throttledUpdateStageScale = updateStageScale;
+  const throttledUpdateStageViewBox = updateStageViewBox;
 
   useEffect(() => {
     enterPresenceRoom("presence/" + draftId);
@@ -200,10 +172,10 @@ const Canvas = (props: Props) => {
   useEffect(() => {
     const updateViewport = () => {
       if (containerRef.current) {
-        throttledUpdateStageViewBox(
-          containerRef.current.clientWidth,
-          containerRef.current.clientHeight
-        );
+        throttledUpdateStageViewBox({
+          x: containerRef.current.clientWidth,
+          y: containerRef.current.clientHeight,
+        });
       }
     };
 
@@ -244,8 +216,11 @@ const Canvas = (props: Props) => {
     };
 
     stage.position(newPos);
-    throttledUpdateStagePosition(newPos.x, newPos.y);
-    throttledUpdateStageScale(newScale, newScale);
+    throttledUpdateStagePosition(newPos);
+    throttledUpdateStageScale({
+      x: newScale,
+      y: newScale,
+    });
   };
 
   const handleCenter = () => {
@@ -265,11 +240,14 @@ const Canvas = (props: Props) => {
       y: container.clientHeight / 2,
     });
 
-    throttledUpdateStagePosition(
-      container.clientWidth / 2,
-      container.clientHeight / 2
-    );
-    throttledUpdateStageScale(fitScale, fitScale);
+    throttledUpdateStagePosition({
+      x: container.clientWidth / 2,
+      y: container.clientHeight / 2,
+    });
+    throttledUpdateStageScale({
+      x: fitScale,
+      y: fitScale,
+    });
   };
 
   const handleContextMenu = (e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -327,14 +305,14 @@ const Canvas = (props: Props) => {
     const container = containerRef.current;
 
     const pos = stage.getPosition();
-    throttledUpdateStagePosition(pos.x, pos.y);
+    throttledUpdateStagePosition(pos);
   };
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    throttledUpdateCursorPosition(
-      e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
-      e.evt.clientY - containerRef.current!.getBoundingClientRect().top
-    );
+    throttledUpdateCursorPosition({
+      x: e.evt.clientX - containerRef.current!.getBoundingClientRect().left,
+      y: e.evt.clientY - containerRef.current!.getBoundingClientRect().top,
+    });
 
     // Do nothing if we didn't start selection
     if (!isSelecting.current) {
