@@ -53,10 +53,9 @@ const Canvas = (props: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
 
-  const [selectionRectangle, setSelectionRectangle] =
-    useState(initSelectionRectangle);
+  const [selectionRectangle, setSelectionRectangle] = useState(initSelectionRectangle);
+  
   const draftId = useCanvasEditorStore((state) => state.id);
-
   const enterPresenceRoom = usePresenceStore((s) => s.liveblocks.enterRoom);
   const leavePresenceRoom = usePresenceStore((s) => s.liveblocks.leaveRoom);
   const updateCursorPosition = usePresenceStore((s) => s.updateCursorPosition);
