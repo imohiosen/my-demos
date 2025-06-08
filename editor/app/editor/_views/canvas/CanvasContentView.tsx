@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";;
+"use client";
 import { useEffect, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import Konva from "konva";
@@ -23,16 +23,10 @@ import { useDragHandler } from "../../_hooks/useDragHandler";
 import { useMouseMoveHandler } from "../../_hooks/useMouseMoveHandler";
 import { useMouseUpHandler } from "../../_hooks/useMouseUpHandler";
 import { useExportImageHandler } from "../../_hooks/useExportImageHandler";
-
-// Constants for initial scale calculation
-const CANVAS_WIDTH = 1920;
-const CANVAS_HEIGHT = 1080;
-
-// TODO
-// Group Items
-// thumbnails
-// delete selected items
-// undo/redo
+import { useInitialScale } from "../../_hooks/useInitialScale";
+import { useViewportUpdater } from "../../_hooks/useViewportUpdater";
+import { useRoomConnection } from "../../_hooks/useRoomConnection";
+import { useSceneSelectionManager } from "../../_hooks/useSceneSelectionManager";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Props = {};
@@ -46,7 +40,6 @@ const initSelectionRectangle: SelectionRectangle = {
 };
 
 const CanvasView = (props: Props) => {
-  
   usePresenceStore((s) => s.liveblocks.isStorageLoading);
   usePresenceStore((s) => s.stageScale);
   usePresenceStore((s) => s.renderCount);
@@ -56,16 +49,18 @@ const CanvasView = (props: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
 
-  const [selectionRectangle, setSelectionRectangle] = useState(initSelectionRectangle);
-  
+  const [selectionRectangle, setSelectionRectangle] = useState(
+    initSelectionRectangle
+  );
+
   const draftId = useCanvasEditorStore((state) => state.id);
-  const enterPresenceRoom = usePresenceStore((s) => s.liveblocks.enterRoom);
-  const leavePresenceRoom = usePresenceStore((s) => s.liveblocks.leaveRoom);
   const updateStageViewBox = usePresenceStore((s) => s.updateStageViewBox);
   const selectedSceneId = usePresenceStore((s) => s.selectedStageId);
   const selectedIds = usePresenceStore((s) => s.selectedIds);
   const updateSelectedIds = usePresenceStore((s) => s.updateSelectedIds);
 
+  const enterPresenceRoom = usePresenceStore((s) => s.liveblocks.enterRoom);
+  const leavePresenceRoom = usePresenceStore((s) => s.liveblocks.leaveRoom);
   const enterRoom = useCanvasEditorStore((s) => s.liveblocks.enterRoom);
   const leaveRoom = useCanvasEditorStore((s) => s.liveblocks.leaveRoom);
   const getSceneById = useCanvasEditorStore((s) => s.getSceneById);
@@ -74,48 +69,34 @@ const CanvasView = (props: Props) => {
   const { handleMouseDown } = useMouseDownHandler({ setSelectionRectangle });
   const { handleWheel } = useWheelHandler({ stageRef });
   const { handleCenter } = useCenterHandler({ stageRef, containerRef });
-  const { handleContextMenu } = useContextMenuHandler({ selectionRectangle, setSelectionRectangle });
+  const { handleContextMenu } = useContextMenuHandler({
+    selectionRectangle,
+    setSelectionRectangle,
+  });
   const { handleDrag } = useDragHandler({ stageRef, containerRef });
-  const { handleMouseMove } = useMouseMoveHandler({ containerRef, selectionRectangle, setSelectionRectangle });
-  const { handleMouseUp } = useMouseUpHandler({ stageRef, selectionRectangle, setSelectionRectangle, selectedSceneId: selectedSceneId! });
+  const { handleMouseMove } = useMouseMoveHandler({
+    containerRef,
+    selectionRectangle,
+    setSelectionRectangle,
+  });
+  const { handleMouseUp } = useMouseUpHandler({
+    stageRef,
+    selectionRectangle,
+    setSelectionRectangle,
+    selectedSceneId: selectedSceneId!,
+  });
   const { handleExportImage } = useExportImageHandler({ stageRef });
+  const { getInitialScale } = useInitialScale({ containerRef });
 
-  useEffect(() => {
-    updateSelectedIds([]);
-  }, [selectedSceneId, updateSelectedIds]);
-
-  useEffect(() => {
-    enterPresenceRoom("presence/" + draftId);
-    enterRoom("storage/" + draftId);
-    return () => {
-      leaveRoom();
-      leavePresenceRoom();
-    };
-  }, [enterRoom, leaveRoom, enterPresenceRoom, leavePresenceRoom, draftId]);
-
-  useEffect(() => {
-    const updateViewport = () => {
-      if (containerRef.current) {
-        updateStageViewBox({
-          x: containerRef.current.clientWidth,
-          y: containerRef.current.clientHeight,
-        });
-      }
-    };
-
-    updateViewport();
-
-    window.addEventListener("resize", updateViewport);
-    return () => window.removeEventListener("resize", updateViewport);
-  }, [updateStageViewBox]);
-
-  const getInitialScale = () => {
-    if (!containerRef.current) return 1;
-    return Math.min(
-      containerRef.current.clientWidth / CANVAS_WIDTH,
-      containerRef.current.clientHeight / CANVAS_HEIGHT
-    );
-  };
+  useViewportUpdater({ containerRef, updateStageViewBox });
+  useRoomConnection({
+    draftId,
+    enterPresenceRoom,
+    leavePresenceRoom,
+    enterRoom,
+    leaveRoom,
+  });
+  useSceneSelectionManager({ selectedSceneId, updateSelectedIds });
 
   if (!containerRef.current) {
     return (
