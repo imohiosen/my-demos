@@ -11,13 +11,11 @@ export type DAvatarProps = {
 export type DAvatar = {
   type: "avatar"; // Type of avatar component
   attribute: DAvatarProps;
-
 };
 
 export type DTextProps = TextConfig &
   NodeConfig & {
     type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
-
   };
 
 export type DText = {
@@ -30,7 +28,6 @@ export type DMediaProps = {
   y: number;
   width?: number;
   height?: number;
-
 };
 
 export type DMedia = {
@@ -53,7 +50,6 @@ export type DElementProps = {
   fontStyle?: string; // Font style for text elements
   align?: string; // Text alignment for text elements
   type?: "rectangle" | "circle" | "line" | "arrow"; // Subtype for more specific element types
-
 };
 
 export type DElement = {
@@ -125,7 +121,6 @@ export type DGroupProps = {
   scaleY?: number; // Scale factor in Y direction
   opacity?: number; // Opacity of the group
   visible?: boolean; // Visibility of the group
-
 };
 
 export type DGroup = {
@@ -185,3 +180,11 @@ export interface Point {
   y: number;
 }
 export type CSSColor = string;
+
+export type SelectionRectangle = {
+  x1: number; // X position of the selection rectangle
+  x2: number; // X position of the selection rectangle
+  y1: number; // Y position of the selection rectangle
+  y2: number; // Y position of the selection rectangle
+  visible: boolean; // Whether the selection rectangle is visible
+};

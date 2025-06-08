@@ -1,6 +1,6 @@
 import Konva from 'konva';
 
-import { DComponent, DElementProps, DGroup, DTextProps, Point, VideoDraft, Selection} from './types';
+import { DComponent, DElementProps, DGroup, DTextProps, Point, VideoDraft, Selection, SelectionRectangle, selectionRectangle } from './types';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Remove conflicting imports and fix type naming
@@ -26,6 +26,7 @@ export type Presence = {
     renderCount: number; // Count of renders for performance tracking
     renderCanvas: () => void; // Render the canvas with current state
 
+
     updateCursorPosition: (position: Point) => void; // Update cursor position
     updateSelectedItems: (items: Selection[]) => void; // Update selected items
     updateStagePosition: (position: Point) => void; // Update stage position
@@ -33,11 +34,15 @@ export type Presence = {
     updateStageScale: (scale: Point) => void; // Update stage scale
     updateSelectedStageId: (sceneId: string) => void; // Update selected group ID
 
-    saveSelectionToLocalStorage: () => void;
-    getSelectionFromLocalStorage: () => string | null;
 
 
 }
+
+export type UIState = {
+    selectionRectangle: SelectionRectangle;
+    setSelectionRectangle: (selectionRectangle: SelectionRectangle) => void; // Set the selection rectangle for multi-selection
+
+};
 
 
 

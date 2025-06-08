@@ -98,7 +98,7 @@ const CircleButton = () => {
         alert("Adding element");
       }}  
     >  
-      <div className="w-24 h-24 bg-primary rounded-full"></div>
+      <div className="w-12 h-24 bg-primary rounded-full"></div>
     </button>
   );
 };

@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { liveblocks, WithLiveblocks } from "@liveblocks/zustand";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -6,6 +7,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Presence,
+  UIState,
   VideoDraftActions,
   VideoDraftState,
 } from "./store";
@@ -14,7 +16,7 @@ import { immer } from "zustand/middleware/immer";
 import { createClient } from "@liveblocks/client";
 import Konva from "konva";
 import { WritableDraft } from "immer";
-import { DComponent, DElementProps, DGroup, Point, Selection } from "./types";
+import { DComponent, DElementProps, DGroup, Point, Selection, SelectionRectangle } from "./types";
 
 type State = VideoDraftState;
 type Actions = VideoDraftActions;
@@ -239,6 +241,7 @@ const init = (set, get) => ({
   stageScale: { x: 1, y: 1 },
   stageViewBox: { x: 0, y: 0 },
   renderCount: 0,
+  selectedStageId: null, // Initially no stage is selected
   updateCursorPosition: (position: Point) => {
     set((state: Presence) => {
       state.cursorPosition = position;
@@ -278,7 +281,6 @@ const init = (set, get) => ({
       state.renderCount += 1; // Increment render count to trigger re-render
     });
   },
-  // Add more actions as needed
 });
 
 export const usePresenceStore = create<WithLiveblocks<Presence>>()(

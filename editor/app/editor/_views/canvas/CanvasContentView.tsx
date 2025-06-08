@@ -12,8 +12,9 @@ import { LucideDownload, LucideTarget } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CanvasBackground from "./components/CanvasBackground";
 import XSelect from "./components/XSelect";
-import SelectionRectangle from "./components/SelectionRectangle";
+import XSelectionRectangle from "./components/SelectionRectangle";
 import XComponent from "./components/XComponent";
+import { SelectionRectangle } from "../../_utils/zustand/konva/types";
 
 // Constants
 const MAX_ZOOM_RATIO = 10;
@@ -34,45 +35,37 @@ type Props = {};
 
 const THROTTLE_DELAY = 200; // Adjust as needed for performance
 
+const initSelectionRectangle = {
+      visible: false,
+      x1: 0,
+      y1: 0,
+      x2: 0,
+      y2: 0,
+    };
+
 const Canvas = (props: Props) => {
-  const [selectionRectangle, setSelectionRectangle] = useState({
-    visible: false,
-    x1: 0,
-    y1: 0,
-    x2: 0,
-    y2: 0,
-  });
+  usePresenceStore((s) => s.liveblocks.isStorageLoading);
+  usePresenceStore((s) => s.stageScale);
+  usePresenceStore((s) => s.renderCount);
+  usePresenceStore((s) => s.stageViewBox);
+  useCanvasEditorStore((s) => s.liveblocks.isStorageLoading);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
 
-  const enterPresenceRoom = usePresenceStore(
-    (state) => state.liveblocks.enterRoom
-  );
-  const leavePresenceRoom = usePresenceStore(
-    (state) => state.liveblocks.leaveRoom
-  );
-  const updateCursorPosition = usePresenceStore(
-    (state) => state.updateCursorPosition
-  );
-  const updateStagePosition = usePresenceStore(
-    (state) => state.updateStagePosition
-  );
+  const [selectionRectangle, setSelectionRectangle] =  useState<SelectionRectangle>(initSelectionRectangle);
 
-  useCanvasEditorStore((state) => state.liveblocks.isStorageLoading);
-  usePresenceStore((state) => state.liveblocks.isStorageLoading);
-  usePresenceStore((state) => state.stageScale);
-  usePresenceStore((state) => state.stageViewBox);
-  const r = usePresenceStore((state) => state.renderCount);
+  const enterPresenceRoom = usePresenceStore((s) => s.liveblocks.enterRoom);
+  const leavePresenceRoom = usePresenceStore((s) => s.liveblocks.leaveRoom);
+  const updateCursorPosition = usePresenceStore((s) => s.updateCursorPosition);
+  const updateStagePosition = usePresenceStore((s) => s.updateStagePosition);
+  const updateStageScale = usePresenceStore((s) => s.updateStageScale);
+  const updateStageViewBox = usePresenceStore((s) => s.updateStageViewBox);
+  const selectedSceneId = usePresenceStore((s) => s.selectedStageId);
 
-  const updateStageScale = usePresenceStore((state) => state.updateStageScale);
-  const updateStageViewBox = usePresenceStore(
-    (state) => state.updateStageViewBox
-  );
-  const selectedSceneId = usePresenceStore((state) => state.selectedStageId);
-
-  const enterRoom = useCanvasEditorStore((state) => state.liveblocks.enterRoom);
-  const leaveRoom = useCanvasEditorStore((state) => state.liveblocks.leaveRoom);
-  const getSceneById = useCanvasEditorStore((state) => state.getSceneById);
+  const enterRoom = useCanvasEditorStore((s) => s.liveblocks.enterRoom);
+  const leaveRoom = useCanvasEditorStore((s) => s.liveblocks.leaveRoom);
+  const getSceneById = useCanvasEditorStore((s) => s.getSceneById);
   const selectedScene = getSceneById(selectedSceneId!);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const isSelecting = useRef(false);
@@ -283,10 +276,10 @@ const Canvas = (props: Props) => {
     e.evt.preventDefault();
     e.evt.stopPropagation();
 
-    setSelectionRectangle((prev) => ({
-      ...prev,
+    setSelectionRectangle({
+      ...selectionRectangle,
       visible: false,
-    }));
+    });
 
     const contextMenuEvent = new CustomEvent("X:CanvasContextMenuEvent", {
       detail: {
@@ -360,11 +353,11 @@ const Canvas = (props: Props) => {
       return;
     }
 
-    setSelectionRectangle((prev) => ({
-      ...prev,
+    setSelectionRectangle({
+      ...selectionRectangle,
       x2: pos.x,
       y2: pos.y,
-    }));
+    });
   };
   const handleMouseUp = (e) => {
     // Do nothing if we didn't start selection
@@ -411,11 +404,11 @@ const Canvas = (props: Props) => {
 
     // Update visibility in timeout, so we can check it in click event
     setTimeout(() => {
-      setSelectionRectangle((prev) => ({
-        ...prev,
+      setSelectionRectangle({
+        ...selectionRectangle,
         visible: false,
-      }));
-    }, 10);
+      });
+    }, 100);
   };
 
   const getInitialScale = () => {
@@ -481,7 +474,7 @@ const Canvas = (props: Props) => {
                 <XComponent key={c.componentId} component={c} />
               ))}
             <XSelect nodeIds={selectedIds} />
-            <SelectionRectangle {...selectionRectangle} />
+            <XSelectionRectangle {...selectionRectangle} />
           </Layer>
         </Stage>
       </div>
