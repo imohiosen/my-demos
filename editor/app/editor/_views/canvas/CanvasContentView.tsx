@@ -35,7 +35,7 @@ type Props = {};
 
 const THROTTLE_DELAY = 200; // Adjust as needed for performance
 
-const initSelectionRectangle = {
+const initSelectionRectangle: SelectionRectangle = {
   visible: false,
   x1: 0,
   y1: 0,
@@ -54,7 +54,7 @@ const Canvas = (props: Props) => {
   const stageRef = useRef<Konva.Stage>(null);
 
   const [selectionRectangle, setSelectionRectangle] =
-    useState<SelectionRectangle>(initSelectionRectangle);
+    useState(initSelectionRectangle);
   const draftId = useCanvasEditorStore((state) => state.id);
 
   const enterPresenceRoom = usePresenceStore((s) => s.liveblocks.enterRoom);
