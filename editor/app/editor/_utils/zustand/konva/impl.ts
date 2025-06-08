@@ -236,14 +236,16 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
 );
 const THROTTLE_DELAY = 200; // Adjust as needed for performance
 
-const init = (set, get) => ({
+const init = (set: any, get: any) => ({
   cursorPosition: { x: 0, y: 0 },
   selectedItems: [],
+  selectedIds: [], // Initialize empty array for selected IDs
+  isSelecting: false, // Initialize selection state as false
   stagePosition: { x: 0, y: 0 },
   stageScale: { x: 1, y: 1 },
   stageViewBox: { x: 0, y: 0 },
   renderCount: 0,
-  selectedStageId: null, // Initially no stage is selected
+  selectedStageId: undefined, // Initially no stage is selected
   updateCursorPosition: throttle((position: Point) => {
     set((state: Presence) => {
       state.cursorPosition = position;
@@ -252,6 +254,16 @@ const init = (set, get) => ({
   updateSelectedItems: (items: Selection[]) => {
     set((state: Presence) => {
       state.selectedItems = items;
+    });
+  },
+  updateSelectedIds: (ids: string[]) => {
+    set((state: Presence) => {
+      state.selectedIds = ids;
+    });
+  },
+  updateIsSelecting: (isSelecting: boolean) => {
+    set((state: Presence) => {
+      state.isSelecting = isSelecting;
     });
   },
   updateStagePosition: throttle((position: Point) => {
@@ -294,6 +306,8 @@ export const usePresenceStore = create<WithLiveblocks<Presence>>()(
           presenceMapping: {
             cursorPosition: true,
             selectedItems: true,
+            selectedIds: true,
+            isSelecting: true,
             stagePosition: true,
             stageScale: true,
             stageViewBox: true,

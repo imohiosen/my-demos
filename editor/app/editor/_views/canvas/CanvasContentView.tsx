@@ -64,17 +64,19 @@ const Canvas = (props: Props) => {
   const updateStageScale = usePresenceStore((s) => s.updateStageScale);
   const updateStageViewBox = usePresenceStore((s) => s.updateStageViewBox);
   const selectedSceneId = usePresenceStore((s) => s.selectedStageId);
+  const selectedIds = usePresenceStore((s) => s.selectedIds);
+  const isSelecting = usePresenceStore((s) => s.isSelecting);
+  const updateSelectedIds = usePresenceStore((s) => s.updateSelectedIds);
+  const updateIsSelecting = usePresenceStore((s) => s.updateIsSelecting);
 
   const enterRoom = useCanvasEditorStore((s) => s.liveblocks.enterRoom);
   const leaveRoom = useCanvasEditorStore((s) => s.liveblocks.leaveRoom);
   const getSceneById = useCanvasEditorStore((s) => s.getSceneById);
   const selectedScene = getSceneById(selectedSceneId!);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const isSelecting = useRef(false);
 
   useEffect(() => {
-    setSelectedIds([]);
-  }, [selectedSceneId]);
+    updateSelectedIds([]);
+  }, [selectedSceneId, updateSelectedIds]);
 
   const handleStageClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // If we are selecting with rect, do nothing
@@ -92,7 +94,7 @@ const Canvas = (props: Props) => {
     }
 
     if (e.target === e.target.getStage()) {
-      setSelectedIds([]);
+      updateSelectedIds([]);
       return;
     }
 
@@ -105,14 +107,14 @@ const Canvas = (props: Props) => {
     if (!metaPressed && !isSelected) {
       // If no key pressed and the node is not selected
       // select just one
-      setSelectedIds([clickedId]);
+      updateSelectedIds([clickedId]);
     } else if (metaPressed && isSelected) {
       // If we pressed keys and node was selected
       // we need to remove it from selection
-      setSelectedIds(selectedIds.filter((id) => id !== clickedId));
+      updateSelectedIds(selectedIds.filter((id) => id !== clickedId));
     } else if (metaPressed && !isSelected) {
       // Add the node into selection
-      setSelectedIds([...selectedIds, clickedId]);
+      updateSelectedIds([...selectedIds, clickedId]);
     }
   };
 
@@ -132,7 +134,7 @@ const Canvas = (props: Props) => {
     }
 
     // Start selection rectangle
-    isSelecting.current = true;
+    updateIsSelecting(true);
     const stage = e.target.getStage();
     if (!stage) {
       console.error("Stage is not defined in handleMouseDown");
@@ -310,7 +312,7 @@ const Canvas = (props: Props) => {
     });
 
     // Do nothing if we didn't start selection
-    if (!isSelecting.current) {
+    if (!isSelecting) {
       return;
     }
     const stage = e.target.getStage();
@@ -332,7 +334,7 @@ const Canvas = (props: Props) => {
       y2: pos.y,
     });
   };
-  const handleMouseUp = (e) => {
+  const handleMouseUp = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // Do nothing if we didn't start selection
     if (e.evt.button === 2) {
       // Right click, do nothing
@@ -342,10 +344,10 @@ const Canvas = (props: Props) => {
       return;
     }
 
-    if (!isSelecting.current) {
+    if (!isSelecting) {
       return;
     }
-    isSelecting.current = false;
+    updateIsSelecting(false);
 
     const selBox = {
       x: Math.min(selectionRectangle.x1, selectionRectangle.x2),
@@ -373,7 +375,7 @@ const Canvas = (props: Props) => {
       }
     });
 
-    setSelectedIds(selected.map((comp) => comp.componentId));
+    updateSelectedIds(selected.map((comp) => comp.componentId));
 
     // Update visibility in timeout, so we can check it in click event
     setTimeout(() => {

@@ -18,6 +18,8 @@ export type VideoDraftState = {
 export type Presence = {
     cursorPosition: Point; // Current cursor position
     selectedItems?: Selection[]; // Array of selected items
+    selectedIds: string[]; // Array of selected element IDs
+    isSelecting: boolean; // Flag to indicate if selection is in progress
     stagePosition?: Point; // Position of the stage
     stageViewBox?: Point; // Height of the stage
     stageScale?: Point; // Scale of the stage
@@ -29,6 +31,8 @@ export type Presence = {
 
     updateCursorPosition: (position: Point) => void; // Update cursor position
     updateSelectedItems: (items: Selection[]) => void; // Update selected items
+    updateSelectedIds: (ids: string[]) => void; // Update selected element IDs
+    updateIsSelecting: (isSelecting: boolean) => void; // Update selection state
     updateStagePosition: (position: Point) => void; // Update stage position
     updateStageViewBox: (viewBox: Point) => void; // Update stage view box
     updateStageScale: (scale: Point) => void; // Update stage scale
