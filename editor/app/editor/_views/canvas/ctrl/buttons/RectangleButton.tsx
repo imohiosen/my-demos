@@ -6,7 +6,7 @@ import Image from "next/image";
 const predefinedComponent = new Konva.Rect({
   x: 0,
   y: 0,
-  width: 100,
+  width: 150,
   height: 100,
   fill: "black",
   type: "rect",
