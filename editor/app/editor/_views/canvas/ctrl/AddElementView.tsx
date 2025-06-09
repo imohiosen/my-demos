@@ -16,6 +16,10 @@ import SquareButton from "./buttons/SquareButton";
 import TriangleButton from "./buttons/TriangleButton";
 import LineButton from "./buttons/LineButton";
 import ArrowButton from "./buttons/ArrowButton";
+import HollowCircleButton from "./buttons/HollowCircleButton";
+import HollowRectangleButton from "./buttons/HollowRectangleButton";
+import HollowSquareButton from "./buttons/HollowSquareButton";
+import HollowTriangleButton from "./buttons/HollowTriangleButton";
 
 type Props = {
   children?: React.ReactNode;
@@ -43,37 +47,72 @@ const AddElementView = (props: Props) => {
                 <TabsTrigger value="icons">Icons</TabsTrigger>
               </TabsList>
               <TabsContent value="shapes">
-                <div className="grid grid-cols-3 gap-2">
-                  <CircleButton 
-                    insertFn={addElement}
-                    postClick={renderCanvas}
-                    selectedSceneId={selectedSceneId!}
-                  />
-                  <RectangleButton
-                    insertFn={addElement}
-                    postClick={renderCanvas}
-                    selectedSceneId={selectedSceneId!}
-                  />
-                  <SquareButton
-                    insertFn={addElement}
-                    postClick={renderCanvas}
-                    selectedSceneId={selectedSceneId!}
-                  />
-                  <TriangleButton
-                    insertFn={addElement}
-                    postClick={renderCanvas}
-                    selectedSceneId={selectedSceneId!}
-                  />
-                  <LineButton
-                    insertFn={addElement}
-                    postClick={renderCanvas}
-                    selectedSceneId={selectedSceneId!}
-                  />
-                  <ArrowButton
-                    insertFn={addElement}
-                    postClick={renderCanvas}
-                    selectedSceneId={selectedSceneId!}
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Filled Shapes</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      <CircleButton 
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                      <RectangleButton
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                      <SquareButton
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                      <TriangleButton
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Hollow Shapes</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      <HollowCircleButton 
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                      <HollowRectangleButton
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                      <HollowSquareButton
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                      <HollowTriangleButton
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Lines & Arrows</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      <LineButton
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                      <ArrowButton
+                        insertFn={addElement}
+                        postClick={renderCanvas}
+                        selectedSceneId={selectedSceneId!}
+                      />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
               <TabsContent value="icons">
