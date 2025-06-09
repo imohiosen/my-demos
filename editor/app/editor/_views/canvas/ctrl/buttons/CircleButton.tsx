@@ -37,7 +37,7 @@ const CircleButton = (props: Props) => {
 
   return (
     <button
-      className="border-1 border-transparent hover:border-1 hover:border-primary bg-primary/10 rounded-xl flex items-center justify-center p-2 m-2"
+      className={`border-1 border-transparent hover:border-1 hover:border-primary bg-primary/10 rounded-xl flex items-center justify-center  size-24`}
       onClick={handleAddElement}
     >
       <Image src={predefinedComponent.toDataURL()} alt="Circle" width={config.ADD_CANVAS_COMPONENT_BUTTON_SIZE} height={config.ADD_CANVAS_COMPONENT_BUTTON_SIZE} />
