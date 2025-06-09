@@ -354,3 +354,12 @@ function getComponentFromSelectedScene(
   return { comp, selectedScene };
 }
 
+export type UIConfig = {
+  ADD_CANVAS_COMPONENT_BUTTON_SIZE: number;
+}
+
+export const useUIConfigStore = create<UIConfig>()(
+  (set, get) => ({
+    ADD_CANVAS_COMPONENT_BUTTON_SIZE: 50, // Default size for the button
+  })
+);

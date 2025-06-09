@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { Circle } from "react-konva";
+import { Circle, Rect } from "react-konva";
 import Enhance from "./Enhance";
 import { DComponent } from "@/app/editor/_utils/zustand/konva/types";
 type Props = {
@@ -32,6 +32,18 @@ const XComponent = (props: Props) => {
           }}
         >
           <Circle {...elem} id={component.componentId} />
+        </Enhance>
+      );
+    } else if (elem.type === "rect") {
+      return (
+        <Enhance
+          key={component.componentId}
+          selection={{
+            sceneId: component.sceneId!,
+            componentId: component.componentId,
+          }}
+        >
+          <Rect {...elem} id={component.componentId} />
         </Enhance>
       );
     } else {

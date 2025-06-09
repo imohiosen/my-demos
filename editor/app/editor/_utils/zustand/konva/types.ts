@@ -49,7 +49,7 @@ export type DElementProps = {
   fontFamily?: string; // Font family for text elements
   fontStyle?: string; // Font style for text elements
   align?: string; // Text alignment for text elements
-  type?: "rectangle" | "circle" | "line" | "arrow"; // Subtype for more specific element types
+  type?: "rect" | "circle" | "line" | "arrow"; // Subtype for more specific element types
 };
 
 export type DElement = {
