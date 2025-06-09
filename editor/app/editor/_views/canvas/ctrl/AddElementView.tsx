@@ -2,21 +2,20 @@
 import {
   useCanvasEditorStore,
   usePresenceStore,
-  useUIConfigStore,
 } from "@/app/editor/_utils/zustand/konva/impl";
-import { useStageRefState } from "@/app/editor/_utils/zustand/konva/store";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Konva from "konva";
 import React from "react";
-import Image from "next/image";
 import CircleButton from "./buttons/CircleButton";
-import { Rectangle } from "recharts";
 import RectangleButton from "./buttons/RectangleButton";
+import SquareButton from "./buttons/SquareButton";
+import TriangleButton from "./buttons/TriangleButton";
+import LineButton from "./buttons/LineButton";
+import ArrowButton from "./buttons/ArrowButton";
 
 type Props = {
   children?: React.ReactNode;
@@ -31,7 +30,7 @@ const AddElementView = (props: Props) => {
 
 
   return (
-    !selectedSceneId || <div className={props.className}>
+    <div className={props.className} >
       <Popover>
         <PopoverTrigger asChild>{props.children}</PopoverTrigger>
         <PopoverContent className=" p-4">
@@ -44,16 +43,36 @@ const AddElementView = (props: Props) => {
                 <TabsTrigger value="icons">Icons</TabsTrigger>
               </TabsList>
               <TabsContent value="shapes">
-                <div className="flex flex-row justify-between">
+                <div className="grid grid-cols-3 gap-2">
                   <CircleButton 
                     insertFn={addElement}
                     postClick={renderCanvas}
-                    selectedSceneId={selectedSceneId}
+                    selectedSceneId={selectedSceneId!}
                   />
                   <RectangleButton
                     insertFn={addElement}
                     postClick={renderCanvas}
-                    selectedSceneId={selectedSceneId}
+                    selectedSceneId={selectedSceneId!}
+                  />
+                  <SquareButton
+                    insertFn={addElement}
+                    postClick={renderCanvas}
+                    selectedSceneId={selectedSceneId!}
+                  />
+                  <TriangleButton
+                    insertFn={addElement}
+                    postClick={renderCanvas}
+                    selectedSceneId={selectedSceneId!}
+                  />
+                  <LineButton
+                    insertFn={addElement}
+                    postClick={renderCanvas}
+                    selectedSceneId={selectedSceneId!}
+                  />
+                  <ArrowButton
+                    insertFn={addElement}
+                    postClick={renderCanvas}
+                    selectedSceneId={selectedSceneId!}
                   />
                 </div>
               </TabsContent>

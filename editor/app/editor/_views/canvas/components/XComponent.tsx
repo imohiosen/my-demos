@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { Circle, Rect } from "react-konva";
+import { Circle, Rect, Line, Arrow } from "react-konva";
 import Enhance from "./Enhance";
 import { DComponent } from "@/app/editor/_utils/zustand/konva/types";
 type Props = {
@@ -44,6 +44,30 @@ const XComponent = (props: Props) => {
           }}
         >
           <Rect {...elem} id={component.componentId} />
+        </Enhance>
+      );
+    } else if (elem.type === "line") {
+      return (
+        <Enhance
+          key={component.componentId}
+          selection={{
+            sceneId: component.sceneId!,
+            componentId: component.componentId,
+          }}
+        >
+          <Line {...elem} id={component.componentId} />
+        </Enhance>
+      );
+    } else if (elem.type === "arrow") {
+      return (
+        <Enhance
+          key={component.componentId}
+          selection={{
+            sceneId: component.sceneId!,
+            componentId: component.componentId,
+          }}
+        >
+          <Arrow {...elem} id={component.componentId} />
         </Enhance>
       );
     } else {
