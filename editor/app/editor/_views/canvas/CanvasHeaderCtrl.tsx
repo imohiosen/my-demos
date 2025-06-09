@@ -11,7 +11,7 @@ import AddAvatar from "./ctrl/AddAvatar";
 import AddBg from "./ctrl/AddBg";
 import AddText from "./ctrl/AddText";
 import AddMedia from "./ctrl/AddMedia";
-import AddElementView from "./ctrl/AddElementView";
+import AddElementView from "./ctrl/elements/AddElementView";
 import AddCaption from "./ctrl/AddCaption";
 
 type Props = {};
