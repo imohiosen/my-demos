@@ -116,61 +116,21 @@ const XComponent = (props: Props) => {
       return null;
     }
 
-    const media = component.media;
+    return (
+      <Enhance
+        key={component.componentId}
+        selection={{
+          sceneId: component.sceneId!,
+          componentId: component.componentId,
+        }}
+      >
+        <XMedia
+          key={component.componentId}
+          component={component}
+        />
+      </Enhance>
+    );
 
-    // For image-based media types
-    if (media.type === "asset-image" || media.type === "image") {
-      return (
-        <Enhance
-          key={component.componentId}
-          selection={{
-            sceneId: component.sceneId!,
-            componentId: component.componentId,
-          }}
-        >
-          <XMedia
-            key={component.componentId}
-            component={component}
-          />
-        </Enhance>
-      );
-    } else if (media.type === "asset-icons" || media.type === "icons") {
-      // Icons are typically rendered as images
-      return (
-        <Enhance
-          key={component.componentId}
-          selection={{
-            sceneId: component.sceneId!,
-            componentId: component.componentId,
-          }}
-        >
-          <XMedia
-            key={component.componentId}
-            component={component}
-          />
-        </Enhance>
-      );
-    } else if (media.type === "asset-video" || media.type === "video") {
-      // For videos, we'll create a placeholder image for now
-      // In a full implementation, you might want to show a video preview or play button
-      return (
-        <Enhance
-          key={component.componentId}
-          selection={{
-            sceneId: component.sceneId!,
-            componentId: component.componentId,
-          }}
-        >
-          <XMedia
-            key={component.componentId}
-            component={component}
-          />
-        </Enhance>
-      );
-    } else {
-      console.error("Unsupported media type: ", media.type);
-      return null;
-    }
   }
   return null;
 };
