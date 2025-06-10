@@ -27,7 +27,8 @@ const XMediaComponent = ({ component }: Props) => {
     >
       <XMedia
         key={component.componentId}
-        component={component}
+        {...component.media.attribute}
+        type={component.media.type}
       />
     </Enhance>
   );

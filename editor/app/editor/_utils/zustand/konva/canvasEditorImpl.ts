@@ -4,7 +4,7 @@ import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import Konva from "konva";
 import { VideoDraftActions, VideoDraftState } from "./store";
-import { DComponent, DElementProps, Selection } from "./types";
+import { DComponent, DElementProps, DMediaProps, Selection } from "./types";
 import { client } from "./client";
 import { generateId, createMetadata } from "./utils";
 
@@ -27,7 +27,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             future: [],
             maxHistorySize: 100,
           },
-          id: "test-006",
+          id: "test-009",
           addScene: () => {
             set((state) => {
               state.current.scenes[generateId()] = [];
@@ -47,7 +47,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               // For now, we'll use a placeholder implementation
               const sceneIds = Object.keys(state.current.scenes);
               const sceneId = sceneIds[0]; // Use first available scene as fallback
-              
+
               if (!sceneId) {
                 throw new Error(`Error: No scenes available`);
               }
@@ -86,12 +86,12 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               // Note: This function needs selectedStageId to be passed or obtained from context
               const sceneIds = Object.keys(state.current.scenes);
               const selectedSceneId = sceneIds[0]; // Use first available scene as fallback
-              
+
               if (!selectedSceneId) throw new Error(`No scene selected`);
               const textComp = state.current.scenes[selectedSceneId].find(
                 (c) => c.componentId === selection.componentId
               ) as DComponent;
-              
+
               if (!textComp) {
                 throw new Error(
                   `Component with id ${selection.componentId} not found in scene ${selectedSceneId}`
@@ -113,51 +113,62 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             selection: Selection,
             attrs: Partial<DElementProps>
           ) => {
+            throw new Error(
+              `mergeAttributes is deprecated, use mergeAttributesV2 instead`
+            );
+          },
+          mergeAttributesV2: (
+            selection: Selection,
+            attrs: Partial<DElementProps | DMediaProps>
+          ) => {
             set((state) => {
-              // Note: This function needs selectedStageId to be passed or obtained from context
-              const sceneIds = Object.keys(state.current.scenes);
-              const selectedSceneId = sceneIds[0]; // Use first available scene as fallback
-              
+              const selectedSceneId = selection.sceneId;
+
               if (!selectedSceneId) throw new Error(`No scene selected`);
               const component = state.current.scenes[selectedSceneId].find(
                 (c) => c.componentId === selection.componentId
               ) as DComponent;
-              
+
               if (!component) {
                 throw new Error(
                   `Component with id ${selection.componentId} not found in scene ${selectedSceneId}`
                 );
               }
 
-              if (component.type !== "element") {
-                console.error(
-                  "Selected component is not an element component:",
-                  component.type
-                );
-                return;
+              switch (component.type) {
+                case "element":
+                  if (!component.element || !component.element.attribute) {
+                    throw new Error(
+                      `Element component does not have element attribute`
+                    );
+                  }
+                  component.element.attribute = {
+                    ...component.element.attribute,
+                    ...attrs,
+                  };
+                  break;
+                case "media":
+                  if (!component.media || !component.media.attribute) {
+                    throw new Error(
+                      `Media component does not have media attribute`
+                    );
+                  }
+                  
+                  component.media.attribute = {
+                    ...component.media.attribute,
+                    ...attrs,
+                  };
+                  break;
+                default:
+                  throw new Error(
+                    `Unsupported component type for mergeAttributesV2: ${component.type}`
+                  );
               }
-
-              if (!component.element || !component.element.attribute) {
-                console.error(
-                  "Element component does not have element attribute"
-                );
-                return;
-              }
-
-              component.element.attribute = {
-                ...component.element.attribute,
-                ...attrs,
-              };
             });
           },
           getComponentBoundingRect: (_selection: Selection) => {
             // Assuming the component has an attribute with x, y, width, height
-            const {
-              x = 0,
-              y = 0,
-              width = 100,
-              height = 100,
-            } = {};
+            const { x = 0, y = 0, width = 100, height = 100 } = {};
 
             return { x, y, width, height };
           },
@@ -178,6 +189,31 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
                 element: {
                   attribute: {
                     ...component.element?.attribute,
+                  },
+                },
+                metadata: createMetadata(),
+              });
+            });
+          },
+
+          addMedia: (component: DComponent) => {
+            set((state) => {
+              const sceneId = component.sceneId;
+              const scene = state.current.scenes[sceneId];
+              if (!scene) {
+                throw new Error(`Scene with id ${sceneId} not found`);
+              }
+              if (!component.media || !component.media.attribute) {
+                throw new Error(`Component does not have media attribute`);
+              }
+              state.current.scenes[sceneId].push({
+                componentId: component.componentId,
+                sceneId: sceneId,
+                type: component.type,
+                media: {
+                  type: component.media.type,
+                  attribute: {
+                    ...component.media?.attribute,
                   },
                 },
                 metadata: createMetadata(),

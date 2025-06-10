@@ -20,8 +20,9 @@ type Props = {
   className?: string;
 };
 
-const AddElementView = (props: Props) => {
+const AddComponentView = (props: Props) => {
   const addElement = useCanvasEditorStore((state) => state.addElement);
+  const addMedia = useCanvasEditorStore((state) => state.addMedia);
   const renderCanvas = usePresenceStore((state) => state.renderCanvas);
   const selectedSceneId = usePresenceStore((state) => state.selectedStageId);
 
@@ -53,7 +54,7 @@ const AddElementView = (props: Props) => {
                   </TabsContent>
                   <TabsContent value="icons">
                     <IconsTab
-                      addElement={addElement}
+                      addMedia={addMedia}
                       renderCanvas={renderCanvas}
                       selectedSceneId={selectedSceneId!}
                     />
@@ -82,4 +83,4 @@ const AddElementView = (props: Props) => {
   );
 };
 
-export default AddElementView;
+export default AddComponentView;

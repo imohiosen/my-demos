@@ -62,7 +62,6 @@ const init = (set: any, _get: any) => ({
       state.selectedStageId = sceneId;
     }); // Update selected stage ID
     // get().saveSelectionToLocalStorage(); // Save to localStorage
-    // console.log("Selected stage ID updated:", sceneId);
   },
   renderCanvas: () => {
     // This function can be used to trigger a re-render of the canvas
@@ -92,7 +91,7 @@ export const usePresenceStore = create<WithLiveblocks<Presence>>()(
         })
       ),
       {
-        name: "local-storage",
+        name: "test-009",
         storage: createJSONStorage(() => ({
           getItem: (key: string) => localStorage.getItem(key),
           setItem: (key: string, value: string) =>

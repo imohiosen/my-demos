@@ -9,6 +9,7 @@ type Props = {
 };
 
 const XElementComponent = ({ component }: Props) => {
+
   if (!component.element) {
     console.error(
       "Element is not defined for component: ",

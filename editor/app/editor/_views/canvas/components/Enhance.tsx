@@ -3,22 +3,21 @@ import { Transformer } from "react-konva";
 import Konva from "konva";
 import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
 import React from "react";
-import { Selection } from "@/app/editor/_utils/zustand/konva/types";
+import { Selection, DMediaProps } from "@/app/editor/_utils/zustand/konva/types";
 
+type Props = { children: React.ReactNode; selection: Selection };
 
-type Props =  {children: React.ReactNode; selection: Selection}
 
 const Enhance = (props: Props) => {
   const nodeRef = useRef<Konva.Node>(null);
   const outlineRef = useRef<Konva.Transformer>(null);
   const mergeAttributes = useCanvasEditorStore(
-    (state) => state.mergeAttributes
+    (state) => state.mergeAttributesV2
   );
 
   const [showOutline, setShowOutline] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   useEffect(() => {
-
     if (nodeRef.current && outlineRef.current) {
       outlineRef.current.nodes([nodeRef.current]);
       outlineRef.current.getLayer()?.batchDraw();
@@ -30,31 +29,37 @@ const Enhance = (props: Props) => {
   };
   const handleDragEnd = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (nodeRef.current) {
-      mergeAttributes(
-        props.selection,
-        {
-          ...e.target.attrs,
-        }
-      );
+      const attrs = {
+        ...(Object.fromEntries(
+          Object.entries(e.target.attrs).filter(
+            ([key, value]) => key !== "image"
+          )
+        ) as DMediaProps),
+      };
+      // Remove non-serializable properties
+      mergeAttributes(props.selection, attrs);
     }
 
     setIsDragging(false);
   };
   const handleTransformEnd = (e: Konva.KonvaEventObject<Event>) => {
     if (nodeRef.current) {
-      mergeAttributes(
-        props.selection,
-        {
-          ...nodeRef.current.attrs,
-        }
-      );
+      const attrs = {
+        ...(Object.fromEntries(
+          Object.entries(nodeRef.current.attrs).filter(
+            ([key, value]) => key !== "image"
+          )
+        ) as DMediaProps),
+      };
+      mergeAttributes(props.selection, {
+        ...attrs,
+      });
     }
   };
   const handleMouseOver = (e: Konva.KonvaEventObject<MouseEvent>) =>
     setShowOutline(true);
   const handleMouseOut = (e: Konva.KonvaEventObject<MouseEvent>) =>
     setShowOutline(false);
-
 
   return (
     <>

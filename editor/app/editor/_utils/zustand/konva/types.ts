@@ -247,9 +247,13 @@ export interface VideoDraftActions {
     style: Partial<DTextProps>,
   ) => void;
   addElement: (component: DComponent) => void;
-
+  addMedia: (component: DComponent) => void;
   handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;
   mergeAttributes: (selection: Selection, attrs: Partial<DElementProps>) => void;
+  mergeAttributesV2: (
+    selection: Selection,
+    attrs: Partial<DElementProps | DMediaProps>
+  ) => void;
   getComponentBoundingRect: (selection: Selection) => { x: number; y: number; width: number; height: number; } | null;
   getSceneById: (sceneId: string) => DComponent[];
 }

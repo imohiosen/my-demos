@@ -1,19 +1,19 @@
-"use client";
-import React, { useState, useMemo } from "react";
+"use client";;
+import { useState, useMemo } from "react";
 import IconButton from "../buttons/IconButton";
 import { DComponent } from "@/app/editor/_utils/zustand/konva/types";
-import { ScrollArea, ScrollAreaViewport } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { lucideIconsIndex, searchIcons } from "./icons.search.index";
+import AddMedia from "../../AddMedia";
 
 type IconsTabProps = {
-  addElement: (comp: DComponent) => void;
+  addMedia: (comp: DComponent) => void;
   renderCanvas: () => void;
   selectedSceneId: string;
 };
 
-const IconsTab = ({ addElement, renderCanvas, selectedSceneId }: IconsTabProps) => {
+const IconsTab = ({ addMedia, renderCanvas, selectedSceneId }: IconsTabProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Get all available icons and filter them based on search
@@ -51,7 +51,7 @@ const IconsTab = ({ addElement, renderCanvas, selectedSceneId }: IconsTabProps) 
             {filteredIcons.map((iconName) => (
               <IconButton
                 key={iconName}
-                insertFn={addElement}
+                insertFn={addMedia}
                 postClick={renderCanvas}
                 selectedSceneId={selectedSceneId}
                 aria-label={`Add ${iconName} icon`}

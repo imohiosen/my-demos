@@ -146,6 +146,5 @@ export function searchIcons(query: string): string[] {
     });
   });
   const x = [...new Set(results.slice(0, 20))]; // Remove duplicates and limit to 20 results
-  console.log("Search results for:", query, x);
   return x;
 }

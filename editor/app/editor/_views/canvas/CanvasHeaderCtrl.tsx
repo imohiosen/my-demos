@@ -11,7 +11,7 @@ import AddAvatar from "./ctrl/AddAvatar";
 import AddBg from "./ctrl/AddBg";
 import AddText from "./ctrl/AddText";
 import AddMedia from "./ctrl/AddMedia";
-import AddElementView from "./ctrl/elements/AddElementView";
+import AddComponentView from "./ctrl/elements/AddComponentView";
 import AddCaption from "./ctrl/AddCaption";
 
 type Props = {};
@@ -28,9 +28,9 @@ const CanvasHeaderCtrl = (props: Props) => {
       <AddMedia>
         <NewComponentCtrl size={'lg'} icon={LucideImage} text={'Media'} />
       </AddMedia>
-      <AddElementView >
+      <AddComponentView >
         <NewComponentCtrl size={'lg'} icon={LucideShapes} text={'Element'} />
-      </AddElementView>
+      </AddComponentView>
       <AddCaption>
         <NewComponentCtrl size={'lg'} icon={LucideCreativeCommons} text={'Caption'} />
       </AddCaption>  
