@@ -1,5 +1,7 @@
+import Konva from "konva";
 import { NodeConfig } from "konva/lib/Node";
 import { TextConfig } from "konva/lib/shapes/Text";
+import Konva from 'konva';
 
 export type DAvatarProps = {
   x: number; // X position of the avatar
@@ -25,9 +27,9 @@ export type DText = {
 export type DMediaProps = {
   src: string; // URL or base64 string for the media
   x: number; // X position of the media
-  y: number;
-  width?: number;
-  height?: number;
+  y: number; // Y position of the media
+  width?: number; // Optional width for rectangle and image
+  height?: number; // Optional height for rectangle and image
 };
 
 export type DMedia = {
@@ -140,7 +142,7 @@ export type DAudio = {
     createdAt: number;
     modifiedAt: number;
     src: string;
-    fileMetadata?: { [key: string]: any }; // Additional metadata from the audio file
+    fileMetadata?: Record<string, unknown>; // Additional metadata from the audio file
   };
 };
 
@@ -188,3 +190,58 @@ export type SelectionRectangle = {
   y2: number; // Y position of the selection rectangle
   visible: boolean; // Whether the selection rectangle is visible
 };
+
+// Store Types
+export type VideoDraftState = {
+  id: string; // Unique identifier for the draft
+  current: VideoDraft;
+  history: {
+    past: VideoDraft[];
+    future: VideoDraft[];
+    maxHistorySize: number;
+  };
+};
+
+export type Presence = {
+  cursorPosition: Point; // Current cursor position
+  selectedItems?: Selection[]; // Array of selected items
+  selectedIds: string[]; // Array of selected element IDs
+  isSelecting: boolean; // Flag to indicate if selection is in progress
+  stagePosition?: Point; // Position of the stage
+  stageViewBox?: Point; // Height of the stage
+  stageScale?: Point; // Scale of the stage
+  selectedStageId?: string; // ID of the selected group
+  
+  renderCount: number; // Count of renders for performance tracking
+  renderCanvas: () => void; // Render the canvas with current state
+
+  updateCursorPosition: (position: Point) => void; // Update cursor position
+  updateSelectedItems: (items: Selection[]) => void; // Update selected items
+  updateSelectedIds: (ids: string[]) => void; // Update selected element IDs
+  updateIsSelecting: (isSelecting: boolean) => void; // Update selection state
+  updateStagePosition: (position: Point) => void; // Update stage position
+  updateStageViewBox: (viewBox: Point) => void; // Update stage view box
+  updateStageScale: (scale: Point) => void; // Update stage scale
+  updateSelectedStageId: (sceneId: string) => void; // Update selected group ID
+};
+
+export type UIState = {
+  selectionRectangle: SelectionRectangle;
+  setSelectionRectangle: (selectionRectangle: SelectionRectangle) => void; // Set the selection rectangle for multi-selection
+};
+
+// Enhanced actions with better organization
+export interface VideoDraftActions {
+  // Stage operations
+  addScene: () => void;
+  addText: (
+    text: string,   
+    style: Partial<DTextProps>,
+  ) => void;
+  addElement: (component: DComponent) => void;
+
+  handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;
+  mergeAttributes: (selection: Selection, attrs: Partial<DElementProps>) => void;
+  getComponentBoundingRect: (selection: Selection) => { x: number; y: number; width: number; height: number; } | null;
+  getSceneById: (sceneId: string) => DComponent[];
+}

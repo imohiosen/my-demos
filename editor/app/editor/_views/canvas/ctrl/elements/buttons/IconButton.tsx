@@ -3,6 +3,10 @@ import { DComponent } from '@/app/editor/_utils/zustand/konva/types';
 import Konva from 'konva';
 import Image from 'next/image';
 
+import * as lucide from 'lucide-react';
+
+console.log(Object.keys(lucide));
+
 type Props = {  
   provider: string,
   iconName: string,
