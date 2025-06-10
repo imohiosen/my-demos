@@ -80,7 +80,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             future: [],
             maxHistorySize: 100,
           },
-          id: "test-005",
+          id: "test-006",
 
           // Actions
           addScene: () => {
