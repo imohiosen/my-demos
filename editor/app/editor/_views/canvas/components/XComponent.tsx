@@ -23,6 +23,8 @@ const XComponent = (props: Props) => {
     return <XMediaComponent component={component} />;
   }
   
+  console.error("Unknown component type:", component.type, "for component:", component.componentId);
+
   return null;
 };
 
