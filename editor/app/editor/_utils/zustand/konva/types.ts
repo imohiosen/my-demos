@@ -25,15 +25,23 @@ export type DText = {
 };
 
 export type DMediaProps = {
-  src: string; // URL or base64 string for the media
+  src: string; // cdn-URL or data-url string for the media
   x: number; // X position of the media
   y: number; // Y position of the media
   width?: number; // Optional width for rectangle and image
   height?: number; // Optional height for rectangle and image
+  caption?: string; // Optional caption text for the media
+  alt?: string; // Optional alt text for the media
 };
 
 export type DMedia = {
-  type: "image" | "video"; // Type of media
+  type: 
+    | "asset-image"
+    | "asset-video"
+    | "asset-icons"
+    | "image"
+    | "video"
+    | "icons";
   attribute: DMediaProps;
 };
 
