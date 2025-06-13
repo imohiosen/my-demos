@@ -6,11 +6,10 @@ import {
 } from "@/components/ui/popover";
 import React from "react";
 import {
-	canvasTitleStyle,
-	canvasTitle2Style,
-	canvasSubtitleStyle,
-	canvasBodyStyle,
-	canvasCaptionStyle,
+    canvasTitle2Style,
+    canvasSubtitleStyle,
+    canvasBodyStyle,
+    canvasCaptionStyle,
 } from "../../../_utils/addTextStyles";
 import { useCanvasEditorStore } from "@/app/editor/_utils/zustand/konva/impl";
 import { DTextProps } from "@/app/editor/_utils/zustand/konva/store";

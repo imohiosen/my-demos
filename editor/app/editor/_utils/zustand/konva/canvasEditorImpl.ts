@@ -41,43 +41,8 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               return [];
             }
           },
-          addText(text, _style) {
-            set((state) => {
-              // Note: This function needs selectedStageId to be passed or obtained from context
-              // For now, we'll use a placeholder implementation
-              const sceneIds = Object.keys(state.current.scenes);
-              const sceneId = sceneIds[0]; // Use first available scene as fallback
+          addText(text, _style) {},
 
-              if (!sceneId) {
-                throw new Error(`Error: No scenes available`);
-              }
-
-              const scene = state.current.scenes[sceneId];
-              if (!scene) {
-                console.error(`Scene with id ${sceneId} not found`);
-                return;
-              }
-
-              // Create the component directly in the immer draft state
-              state.current.scenes[sceneId].push({
-                componentId: generateId(),
-                sceneId: sceneId,
-                type: "text",
-                text: {
-                  attribute: {
-                    x: 0,
-                    y: 0,
-                    fontSize: 96,
-                    fontWeight: 700,
-                    fontFamily: "Arial",
-                    type: "title",
-                    text: text,
-                  },
-                },
-                metadata: createMetadata(),
-              });
-            });
-          },
           handleTextDragEnd: (
             selection: Selection,
             e: Konva.KonvaEventObject<DragEvent>
@@ -221,6 +186,25 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             });
           },
 
+          addText2(component: DComponent) {
+            set((state) => {
+              const sceneId = component.sceneId;
+              const scene = state.current.scenes[sceneId];
+              if (!scene) {
+                throw new Error(`Scene with id ${sceneId} not found`);
+              }
+              if (!component.text || !component.text.attribute) {
+                throw new Error(`Component does not have text attribute`);
+              }
+              state.current.scenes[sceneId].push({
+                componentId: component.componentId,
+                sceneId: sceneId,
+                type: component.type,
+                text: component.text,
+                metadata: createMetadata(),
+              });
+            });
+          },
           getSceneById: (id: string): DComponent[] => {
             const state = get();
             if (!state.current.scenes[id]) {

@@ -1,7 +1,6 @@
 import Konva from "konva";
 import { NodeConfig } from "konva/lib/Node";
 import { TextConfig } from "konva/lib/shapes/Text";
-import Konva from 'konva';
 
 export type DAvatarProps = {
   x: number; // X position of the avatar
@@ -15,13 +14,13 @@ export type DAvatar = {
   attribute: DAvatarProps;
 };
 
-export type DTextProps = TextConfig &
-  NodeConfig & {
-    type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
-  };
+type ExcludedTextPropAttributes = "filter" | "fillPatternImage";
+
+export type DTextProps =  Omit<TextConfig & NodeConfig, ExcludedTextPropAttributes>;
 
 export type DText = {
-  attribute: DTextProps;
+    attribute: DTextProps;
+    type: "title" | "title2" | "subtitle" | "text" | "caption"; // Type of text element
 };
 
 export type DMediaProps = {
