@@ -1,113 +1,167 @@
-// XText.tsx
-import React, { useState, useRef, useEffect } from "react";
-import { Html } from "react-konva-utils";
-import type { TextConfig } from "konva/lib/shapes/Text";
+import { DTextProps } from '@/app/editor/_utils/zustand/konva/types';
+import Konva from 'konva';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { Text, Transformer } from 'react-konva';
+import { Html } from 'react-konva-utils';
 
-interface XTextProps extends TextConfig {
-  /**
-   * Called when the text is changed (Enter pressed or blur).
-   * Provides the new text string.
-   */
-  onChange?: (newText: string) => void;
-}
+// Fix text rendering in Konva
+Konva._fixTextRendering = true;
 
-const XText: React.FC<XTextProps> = ({
-    scale = { x: 1, y: 1 },
-  x = 0,
-  y = 0,
-  text = "",
-  fontSize = 20,
-  fontFamily = "Arial",
-  fill = "black",
-  width,
-  onChange,
-  ...restProps
+const TextEditor = ({ textNode, onClose, onChange }: {
+  textNode: Konva.Text;
+  onClose: () => void;
+  onChange: (text: string) => void;
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!textareaRef.current) return;
+
+    const textarea = textareaRef.current;
+    const textPosition = textNode.position();
+    const areaPosition = {
+      x: textPosition.x,
+      y: textPosition.y,
+    };
+
+    // Match styles with the text node
+    textarea.value = textNode.text();
+    textarea.style.position = 'absolute';
+    textarea.style.top = `${areaPosition.y}px`;
+    textarea.style.left = `${areaPosition.x}px`;
+    textarea.style.width = `${textNode.width() - (textNode.padding() || 0) * 2}px`;
+    textarea.style.height = `${textNode.height() - (textNode.padding() || 0) * 2 + 5}px`;
+    textarea.style.fontSize = `${textNode.fontSize() || 16}px`;
+    textarea.style.border = 'none';
+    textarea.style.padding = '0px';
+    textarea.style.margin = '0px';
+    textarea.style.overflow = 'hidden';
+    textarea.style.background = 'none';
+    textarea.style.outline = 'none';
+    textarea.style.resize = 'none';
+    textarea.style.lineHeight = `${textNode.lineHeight() || 1}`;
+    textarea.style.fontFamily = textNode.fontFamily() || 'Arial';
+    textarea.style.transformOrigin = 'left top';
+    textarea.style.textAlign = textNode.align() || 'left';
+    const fillValue = textNode.fill();
+    textarea.style.color = typeof fillValue === 'string' ? fillValue : 'black';
+
+    const rotation = textNode.rotation();
+    let transform = '';
+    if (rotation) {
+      transform += `rotateZ(${rotation}deg)`;
+    }
+    textarea.style.transform = transform;
+
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight + 3}px`;
+
+    textarea.focus();
+
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (e.target !== textarea) {
+        onChange(textarea.value);
+        onClose();
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        onChange(textarea.value);
+        onClose();
+      }
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    const handleInput = () => {
+      const scale = textNode.getAbsoluteScale().x;
+      textarea.style.width = `${textNode.width() * scale}px`;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight + (textNode.fontSize() || 16)}px`;
+    };
+
+    textarea.addEventListener('keydown', handleKeyDown);
+    textarea.addEventListener('input', handleInput);
+    setTimeout(() => {
+      window.addEventListener('click', handleOutsideClick);
+    });
+
+    return () => {
+      textarea.removeEventListener('keydown', handleKeyDown);
+      textarea.removeEventListener('input', handleInput);
+      window.removeEventListener('click', handleOutsideClick);
+    };
+  }, [textNode, onChange, onClose]);
+
+  return (
+    <Html>
+      <textarea
+        ref={textareaRef}
+        style={{
+          minHeight: '1em',
+          position: 'absolute',
+        }}
+      />
+    </Html>
+  );
+};
+
+type XTextProps = Konva.NodeConfig & DTextProps & { type: string }; // don't change this line
+const XText = (props: XTextProps) => { // don't change this line
   const [isEditing, setIsEditing] = useState(false);
-  const [currentText, setCurrentText] = useState(text);
+  const [textWidth, setTextWidth] = useState(props.width || 200);
+  const [currentText, setCurrentText] = useState(props.text || 'Text');
+  const textRef = useRef<Konva.Text>(null);
 
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  // When “text” prop changes from parent, keep it in sync if not editing.
-  useEffect(() => {
-    if (!isEditing) {
-      setCurrentText(text);
-    }
-  }, [text, isEditing]);
+  const handleTextDblClick = useCallback(() => {
+    setIsEditing(true);
+  }, []);
 
-  // When entering edit mode, focus the <input> and move cursor to end
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      const el = inputRef.current;
-      el.focus();
-      el.setSelectionRange(el.value.length, el.value.length);
-    }
-  }, [isEditing]);
+  const handleTextChange = useCallback((newText: string) => {
+    setCurrentText(newText);
+  }, []);
 
-  // Handler for when user presses a key inside <input>
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      // Commit on Enter
-      finishEditing();
-    } else if (e.key === "Escape") {
-      // Cancel edit on Escape: revert to last committed value
-      setCurrentText(text);
-      setIsEditing(false);
-    }
-  };
-
-  // Called when input loses focus or Enter is pressed
-  const finishEditing = () => {
-    setIsEditing(false);
-    if (onChange) {
-      onChange(currentText);
-    }
-  };
+  const handleTransform = useCallback(() => {
+    const node = textRef.current;
+    if (!node) return;
+    
+    const scaleX = node.scaleX();
+    const newWidth = node.width() * scaleX;
+    setTextWidth(newWidth);
+    node.setAttrs({
+      width: newWidth,
+      scaleX: 1,
+    });
+  }, []);
 
   return (
     <>
-      <Html
-        transform
-        
-        groupProps={{ x, y }}
-        divProps={{
-          style: {
-            pointerEvents: "auto",
-            margin: 0,
-            padding: 0,
-            display: "inline",
-          },
-        }}
-      >
-
-        
-          <input
-            ref={inputRef}
-            type="text"
-            value={"Add title"}
-            onChange={(e) => setCurrentText(e.target.value)}
-            onBlur={finishEditing}
-            onKeyDown={handleKeyDown}
-            placeholder="Add title"
-            style={{
-                scale: 2.5,
-              margin: 0,
-              padding: 0,
-              fontSize: `36px`,
-                fontWeight: 700,
-              fontFamily: fontFamily,
-            color: fill as string,
-              outline: "none",
-              border : "none",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              backgroundColor: "transparent",
-              display: "inline",
-            }}
-            {...restProps}
-          />
-      </Html>
+      <Text
+        ref={textRef}
+        text={currentText}
+        draggable
+        width={textWidth}
+        onDblClick={handleTextDblClick}
+        onDblTap={handleTextDblClick}
+        onTransform={handleTransform}
+        visible={!isEditing}
+        fontSize={props.fontSize || 16}
+        fontFamily={props.fontFamily || 'Arial'}
+        fill={props.fill || 'black'}
+        align={props.align || 'left'}
+        {...props}
+      />
+      {isEditing && textRef.current && (
+        <TextEditor
+          textNode={textRef.current}
+          onChange={handleTextChange}
+          onClose={() => setIsEditing(false)}
+        />
+      )}
     </>
   );
 };

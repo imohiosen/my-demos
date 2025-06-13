@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
-import { Text } from "react-konva";
+"use client";;
 import Enhance from "./Enhance";
 import { DComponent } from "@/app/editor/_utils/zustand/konva/types";
+import XText from "./XText";
 
 type Props = {
   component: DComponent;
@@ -27,9 +27,10 @@ const XTextComponent = ({ component }: Props) => {
         componentId: component.componentId,
       }}
     >
-      <Text {...textAttrs} id={component.componentId} />
+      <XText {...textAttrs} id={component.componentId} />
     </Enhance>
   );
+  
 };
 
 export default XTextComponent;
