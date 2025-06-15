@@ -245,7 +245,6 @@ export interface VideoDraftActions {
   addElement: (component: DComponent) => void;
   addMedia: (component: DComponent) => void;
   handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;
-  mergeAttributes: (selection: Selection, attrs: Partial<DElementProps>) => void;
   mergeAttributesV2: (
     selection: Selection,
     attrs: Partial<DElementProps | DMediaProps>

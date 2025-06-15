@@ -7,6 +7,7 @@ import { VideoDraftActions, VideoDraftState } from "./store";
 import { DComponent, DElementProps, DMediaProps, Selection } from "./types";
 import { client } from "./client";
 import { generateId, createMetadata } from "./utils";
+import { mergeAttrsToVideoDraftState } from "@/lib/pure/mergeAttrsToVideoDraftState";
 
 type State = VideoDraftState;
 type Actions = VideoDraftActions;
@@ -72,73 +73,11 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               textComp.text.attribute = { ...e?.target?.attrs };
             });
           },
-          mergeAttributes: (
-            selection: Selection,
-            attrs: Partial<DElementProps>
-          ) => {
-            throw new Error(
-              `mergeAttributes is deprecated, use mergeAttributesV2 instead`
-            );
-          },
           mergeAttributesV2: (
             selection: Selection,
             attrs: Partial<DElementProps | DMediaProps>
           ) => {
-            set((state) => {
-              const selectedSceneId = selection.sceneId;
-
-              if (!selectedSceneId) throw new Error(`No scene selected`);
-              const component = state.current.scenes[selectedSceneId].find(
-                (c) => c.componentId === selection.componentId
-              ) as DComponent;
-
-              if (!component) {
-                throw new Error(
-                  `Component with id ${selection.componentId} not found in scene ${selectedSceneId}`
-                );
-              }
-
-              switch (component.type) {
-                case "element":
-                  if (!component.element || !component.element.attribute) {
-                    throw new Error(
-                      `Element component does not have element attribute`
-                    );
-                  }
-                  component.element.attribute = {
-                    ...component.element.attribute,
-                    ...attrs,
-                  };
-                  break;
-                case "media":
-                  if (!component.media || !component.media.attribute) {
-                    throw new Error(
-                      `Media component does not have media attribute`
-                    );
-                  }
-                  
-                  component.media.attribute = {
-                    ...component.media.attribute,
-                    ...attrs,
-                  };
-                  break;
-                case "text":
-                  if (!component.text || !component.text.attribute) {
-                    throw new Error(
-                      `Text component does not have text attribute`
-                    );
-                  }
-                  component.text.attribute = {
-                    ...component.text.attribute,
-                    ...attrs,
-                  };
-                  break;
-                default:
-                  throw new Error(
-                    `Unsupported component type for mergeAttributesV2: ${component.type}`
-                  );
-              }
-            });
+            mergeAttrsToVideoDraftState(set, selection, attrs);
           },
           getComponentBoundingRect: (_selection: Selection) => {
             // Assuming the component has an attribute with x, y, width, height
@@ -236,3 +175,8 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
     }
   )
 );
+
+
+
+
+
