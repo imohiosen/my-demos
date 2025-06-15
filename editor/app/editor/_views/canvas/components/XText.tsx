@@ -1,17 +1,24 @@
 import { DTextProps } from '@/app/editor/_utils/zustand/konva/types';
 import Konva from 'konva';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Text, Transformer } from 'react-konva';
+import { Rect, Text, Transformer } from 'react-konva';
 import { Html } from 'react-konva-utils';
 
 // Fix text rendering in Konva
 Konva._fixTextRendering = true;
 
-const TextEditor = ({ textNode, onClose, onChange }: {
-  textNode: Konva.Text;
-  onClose: () => void;
-  onChange: (text: string) => void;
-}) => {
+const TextEditor = (props: DTextProps) => {
+  return <Rect 
+    x={0}
+    y={0}
+    width={ 200}
+    height={ 50}
+    fill="red"
+    stroke="black"
+    strokeWidth={1}
+  />;
+  console.log('TextEditor rendered:', props.text);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -95,7 +102,6 @@ const TextEditor = ({ textNode, onClose, onChange }: {
       window.removeEventListener('click', handleOutsideClick);
     };
   }, [textNode, onChange, onClose]);
-
   return (
     <Html>
       <textarea
@@ -104,17 +110,16 @@ const TextEditor = ({ textNode, onClose, onChange }: {
           minHeight: '1em',
           position: 'absolute',
         }}
+        value={value} // Ensure textarea has initial text
       />
     </Html>
   );
 };
 
-type XTextProps = Konva.NodeConfig & DTextProps & { type: string }; // don't change this line
-const XText = (props: XTextProps) => { // don't change this line
+const XText = (props: DTextProps) => { // don't change this line
   const [isEditing, setIsEditing] = useState(false);
   const [textWidth, setTextWidth] = useState(props.width || 200);
   const [currentText, setCurrentText] = useState(props.text || 'Text');
-  const textRef = useRef<Konva.Text>(null);
 
 
   const handleTextDblClick = useCallback(() => {
@@ -125,29 +130,14 @@ const XText = (props: XTextProps) => { // don't change this line
     setCurrentText(newText);
   }, []);
 
-  const handleTransform = useCallback(() => {
-    const node = textRef.current;
-    if (!node) return;
-    
-    const scaleX = node.scaleX();
-    const newWidth = node.width() * scaleX;
-    setTextWidth(newWidth);
-    node.setAttrs({
-      width: newWidth,
-      scaleX: 1,
-    });
-  }, []);
-
   return (
     <>
       <Text
-        ref={textRef}
         text={currentText}
         draggable
         width={textWidth}
         onDblClick={handleTextDblClick}
         onDblTap={handleTextDblClick}
-        onTransform={handleTransform}
         visible={!isEditing}
         fontSize={props.fontSize || 16}
         fontFamily={props.fontFamily || 'Arial'}
@@ -155,11 +145,9 @@ const XText = (props: XTextProps) => { // don't change this line
         align={props.align || 'left'}
         {...props}
       />
-      {isEditing && textRef.current && (
+      {isEditing && (
         <TextEditor
-          textNode={textRef.current}
-          onChange={handleTextChange}
-          onClose={() => setIsEditing(false)}
+          {...props}
         />
       )}
     </>

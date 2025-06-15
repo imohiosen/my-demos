@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import AddAvatar from "./ctrl/AddAvatar";
 import AddBg from "./ctrl/AddBg";
-import AddText from "./ctrl/AddText";
+import AddTextView from "./ctrl/AddTextView";
 import AddMedia from "./ctrl/AddMedia";
 import AddComponentView from "./ctrl/elements/AddComponentView";
 import AddCaption from "./ctrl/AddCaption";
@@ -22,9 +22,9 @@ const CanvasHeaderCtrl = (props: Props) => {
       <AddAvatar >
         <NewComponentCtrl size={'lg'} icon={LucideCircleUser} text={'Avatar'} />
       </AddAvatar>
-      <AddText>
+      <AddTextView>
         <NewComponentCtrl size={'lg'} icon={LucideType} text={'Text'} />
-      </AddText>
+      </AddTextView>
       <AddMedia>
         <NewComponentCtrl size={'lg'} icon={LucideImage} text={'Media'} />
       </AddMedia>

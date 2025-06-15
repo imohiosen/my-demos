@@ -41,8 +41,6 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               return [];
             }
           },
-          addText(text, _style) {},
-
           handleTextDragEnd: (
             selection: Selection,
             e: Konva.KonvaEventObject<DragEvent>
@@ -124,6 +122,17 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
                     ...attrs,
                   };
                   break;
+                case "text":
+                  if (!component.text || !component.text.attribute) {
+                    throw new Error(
+                      `Text component does not have text attribute`
+                    );
+                  }
+                  component.text.attribute = {
+                    ...component.text.attribute,
+                    ...attrs,
+                  };
+                  break;
                 default:
                   throw new Error(
                     `Unsupported component type for mergeAttributesV2: ${component.type}`
@@ -186,7 +195,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
             });
           },
 
-          addText2(component: DComponent) {
+          addText(component: DComponent) {
             set((state) => {
               const sceneId = component.sceneId;
               const scene = state.current.scenes[sceneId];
@@ -196,7 +205,7 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               if (!component.text || !component.text.attribute) {
                 throw new Error(`Component does not have text attribute`);
               }
-              state.current.scenes[sceneId].push({
+              state.current.scenes[sceneId].push({  
                 componentId: component.componentId,
                 sceneId: sceneId,
                 type: component.type,

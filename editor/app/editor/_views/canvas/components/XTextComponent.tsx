@@ -20,7 +20,7 @@ const XTextComponent = ({ component }: Props) => {
   const textAttrs = component.text.attribute;
 
   return (
-    <Enhance
+    <Enhance  
       key={component.componentId}
       selection={{
         sceneId: component.sceneId!,

@@ -241,10 +241,7 @@ export type UIState = {
 export interface VideoDraftActions {
   // Stage operations
   addScene: () => void;
-  addText: (
-    text: string,   
-    style: Partial<DTextProps>,
-  ) => void;
+  addText(component: DComponent) : void;
   addElement: (component: DComponent) => void;
   addMedia: (component: DComponent) => void;
   handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;
