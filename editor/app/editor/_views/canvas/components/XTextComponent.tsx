@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";;
 import Enhance from "./Enhance";
-import { DComponent } from "@/app/editor/_utils/zustand/konva/types";
-import XText from "./XText";
+import { DComponent, DTextProps } from "@/app/editor/_utils/zustand/konva/types";
+import XText$ from "./XText";
 
 type Props = {
   component: DComponent;
@@ -19,6 +19,8 @@ const XTextComponent = ({ component }: Props) => {
 
   const textAttrs = component.text.attribute;
 
+  const onChange = (newAttrs: DTextProps) => {
+  };
   return (
     <Enhance  
       key={component.componentId}
@@ -27,7 +29,11 @@ const XTextComponent = ({ component }: Props) => {
         componentId: component.componentId,
       }}
     >
-      <XText {...textAttrs} id={component.componentId} />
+      <XText$ 
+      {...textAttrs} 
+      id={component.componentId} 
+      onChange={onChange}
+      />
     </Enhance>
   );
   

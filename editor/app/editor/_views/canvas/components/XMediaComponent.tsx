@@ -9,13 +9,17 @@ type Props = {
 };
 
 const XMediaComponent = ({ component }: Props) => {
-  if (!component.media) {
+  const media = component.media || component.avatar;
+  if (!media) {
     console.error(
-      "Media is not defined for component: ",
+      "Media/Avatar is not defined for component: ",
       component.componentId
     );
     return null;
   }
+
+
+
 
   return (
     <Enhance
@@ -27,8 +31,8 @@ const XMediaComponent = ({ component }: Props) => {
     >
       <XMedia
         key={component.componentId}
-        {...component.media.attribute}
-        type={component.media.type}
+        {...media.attribute}
+        type={media.type}
       />
     </Enhance>
   );

@@ -153,6 +153,25 @@ export const useCanvasEditorStore = create<WithLiveblocks<State & Actions>>()(
               });
             });
           },
+          addAvatar: (component: DComponent) => {
+            set((state) => {
+              const sceneId = component.sceneId;
+              const scene = state.current.scenes[sceneId];
+              if (!scene) {
+                throw new Error(`Scene with id ${sceneId} not found`);
+              }
+              if (!component.avatar || !component.avatar.attribute) {
+                throw new Error(`Component does not have avatar attribute`);
+              }
+              state.current.scenes[sceneId].push({
+                componentId: component.componentId,
+                sceneId: sceneId,
+                type: "avatar",
+                avatar: { ...component.avatar },
+                metadata: createMetadata(),
+              });
+            });
+          },
           getSceneById: (id: string): DComponent[] => {
             const state = get();
             if (!state.current.scenes[id]) {

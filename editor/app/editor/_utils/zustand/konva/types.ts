@@ -2,17 +2,6 @@ import Konva from "konva";
 import { NodeConfig } from "konva/lib/Node";
 import { TextConfig } from "konva/lib/shapes/Text";
 
-export type DAvatarProps = {
-  x: number; // X position of the avatar
-  y: number; // Y position of the avatar
-  width: number; // Width of the avatar
-  height: number; // Height of the avatar
-};
-
-export type DAvatar = {
-  type: "avatar"; // Type of avatar component
-  attribute: DAvatarProps;
-};
 
 type ExcludedTextPropAttributes = "filter" | "fillPatternImage";
 
@@ -35,6 +24,7 @@ export type DMediaProps = {
 
 export type DMedia = {
   type: 
+    | "avatar"
     | "asset-image"
     | "asset-video"
     | "asset-icons"
@@ -106,7 +96,7 @@ export type DComponent = {
     | "audio-caption"
     | "group"; // Type of component
   text?: DText; // Text content for text components
-  avatar?: DAvatar; // Updated to use DAvatar type for user-related components
+  avatar?: DMedia; // Updated to use DAvatar type for user-related components
   media?: DMedia; // Updated to use DMedia type for image/video/audio components
   background?: DBackground; // Updated to use DBackground type for components
   audioCaption?: DAudioCaption; // Updated to use DAudioCaption type for audio components
@@ -242,6 +232,7 @@ export interface VideoDraftActions {
   // Stage operations
   addScene: () => void;
   addText(component: DComponent) : void;
+  addAvatar: (component: DComponent) => void;
   addElement: (component: DComponent) => void;
   addMedia: (component: DComponent) => void;
   handleTextDragEnd: (selection: Selection, e: Konva.KonvaEventObject<DragEvent>) => void;

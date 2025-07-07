@@ -14,7 +14,6 @@ export type {
 } from './types';
 
 // Re-export stores
-export { useCanvasEditorStore } from './videoDraftStore';
 export { usePresenceStore } from './presenceStore';
 export { useUIStore } from './uiStore';
 export { useUIConfigStore, type UIConfig } from './uiConfigStore';

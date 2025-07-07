@@ -21,6 +21,9 @@ const XComponent = (props: Props) => {
     return <XTextComponent component={component} />;
   } else if (component.type === "media") {
     return <XMediaComponent component={component} />;
+  } else if (component.type === "avatar") {
+    // Handle avatar component rendering
+    return <XMediaComponent component={component} />;
   }
   
   console.error("Unknown component type:", component.type, "for component:", component.componentId);
