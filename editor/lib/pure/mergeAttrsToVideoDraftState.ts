@@ -32,14 +32,27 @@ export function mergeAttrsToVideoDraftState(
         };
         break;
       case "media":
-        if (!component.media || !component.media.attribute) {
+          if (!component.media || !component.media.attribute) {
+            throw new Error(
+              `Media component does not have media attribute`
+            );
+          }
+  
+          component.media.attribute = {
+            ...component.media.attribute,
+            ...attrs,
+          };
+          break;
+        
+      case "avatar":
+        if (!component.avatar || !component.avatar.attribute) {
           throw new Error(
             `Media component does not have media attribute`
           );
         }
 
-        component.media.attribute = {
-          ...component.media.attribute,
+        component.avatar.attribute = {
+          ...component.avatar.attribute,
           ...attrs,
         };
         break;
